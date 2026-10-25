@@ -1,4 +1,11 @@
-import { buildSearchableValue, getValueFromItem } from "./combobox-utils";
+import { buildSearchableValue, getValueFromItem } from "./utils";
+
+/** Warnings fire in dev builds only; works in Vite, Next and union apps (no `process` dependency). */
+function getIsDevelopment(): boolean {
+  const env = (import.meta as { env?: { DEV?: boolean; NODE_ENV?: string } }).env;
+  return env?.DEV === true || env?.NODE_ENV === "development";
+}
+const isDevelopment = getIsDevelopment();
 
 /** Internal synthetic children key after `buildNestedFromFlat` (not part of flat row shape). */
 export const COMBOBOX_TREE_CHILDREN_KEY = "children";
@@ -48,7 +55,7 @@ export function buildNestedFromFlat<T>(
   for (const item of flat) {
     const id = getValueFromItem(item, valueKey);
     if (itemsById.has(id)) {
-      if (process.env.NODE_ENV !== "production" && !duplicateWarned) {
+      if (isDevelopment && !duplicateWarned) {
         console.warn(
           "[ComboboxTree] Duplicate valueKey in flat data; later rows are skipped.",
         );
@@ -77,21 +84,21 @@ export function buildNestedFromFlat<T>(
     const parentStr = getValueFromItem(item, flatParentKey);
     if (isRootParentString(parentStr, rootExtra)) return null;
     if (parentStr === id) {
-      if (process.env.NODE_ENV !== "production" && !orphanWarned) {
+      if (isDevelopment && !orphanWarned) {
         console.warn("[ComboboxTree] flat tree: self-parent row promoted to root.", id);
         orphanWarned = true;
       }
       return null;
     }
     if (!itemsById.has(parentStr)) {
-      if (process.env.NODE_ENV !== "production" && !orphanWarned) {
+      if (isDevelopment && !orphanWarned) {
         console.warn("[ComboboxTree] flat tree: missing parent; row promoted to root.", id);
         orphanWarned = true;
       }
       return null;
     }
     if (flatParentChainReaches(itemsById, parentStr, id, flatParentKey, rootExtra)) {
-      if (process.env.NODE_ENV !== "production" && !orphanWarned) {
+      if (isDevelopment && !orphanWarned) {
         console.warn("[ComboboxTree] flat tree: cycle prevented; row promoted to root.", id);
         orphanWarned = true;
       }
@@ -262,3 +269,4 @@ export function filterTree<T>(
 
   return { filteredData: filter(items), searchExpandedIds: newExpandedIds };
 }
+

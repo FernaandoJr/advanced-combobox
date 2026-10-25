@@ -9,13 +9,13 @@ import {
   getItemByValue,
   getItemsByValues,
   getSelfAndDescendantValues,
-} from "./combobox-tree-utils";
+} from "./tree-utils";
 import {
   getButtonLabelNode,
   getRawValueFromItem,
   getValueFromItem,
-} from "./combobox-utils";
-import type { ComboboxTreeProps, ComboboxValueType, RemoteConfigTree } from "./combobox-types";
+} from "./utils";
+import type { ComboboxTreeProps, ComboboxValueType, RemoteConfigTree } from "./types";
 import {
   DEFAULT_COLLAPSE_ALL_LABEL,
   DEFAULT_EMPTY_MESSAGE,
@@ -24,14 +24,15 @@ import {
   DEFAULT_PLACEHOLDER,
   DEFAULT_REMOTE_ERROR_MESSAGE,
   DEFAULT_SEARCH_PLACEHOLDER,
-} from "./combobox-defaults";
-import { useRemoteItems } from "./combobox-remote";
+} from "./defaults";
+import { useRemoteItems } from "./remote";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import {
   ChevronsUpDown,
@@ -320,9 +321,9 @@ export function ComboboxTree<T>({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent
+        <ComboboxPopoverContent
           container={portalContainer}
-          className={cn("p-0 w-(--radix-popover-trigger-width)")}
+          className="p-0 w-(--radix-popover-trigger-width)"
           align='start'
         >
           <div className='flex flex-col gap-2 p-2 border-b'>
@@ -389,8 +390,9 @@ export function ComboboxTree<T>({
               childrenKey={treeChildrenKey}
             />
           </ScrollArea>
-        </PopoverContent>
+        </ComboboxPopoverContent>
       </Popover>
     </Fragment>
   );
 }
+

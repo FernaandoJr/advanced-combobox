@@ -10,7 +10,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -24,8 +25,8 @@ import {
   DEFAULT_PLACEHOLDER,
   DEFAULT_REMOTE_ERROR_MESSAGE,
   DEFAULT_SEARCH_PLACEHOLDER,
-} from "./combobox-defaults";
-import { useRemoteItems } from "./combobox-remote";
+} from "./defaults";
+import { useRemoteItems } from "./remote";
 import type {
   ComboboxOption,
   ComboboxProps,
@@ -33,7 +34,7 @@ import type {
   MenuItemConfig,
   RemoteConfig,
   SelectedItemConfig,
-} from "./combobox-types";
+} from "./types";
 import {
   buildSearchableValue,
   getButtonLabelNode,
@@ -42,7 +43,7 @@ import {
   getLabelNode,
   getRawValueFromItem,
   isSameComboboxValue,
-} from "./combobox-utils";
+} from "./utils";
 
 interface OptionEntry<T> {
   option: ComboboxOption<ComboboxValueType<T>>;
@@ -461,9 +462,8 @@ export function Combobox<T>({
             </Button>
           ) : null}
         </div>
-        <PopoverContent
-          data-combobox-content=''
-          className={cn("p-0", "w-(--radix-popover-trigger-width)")}
+        <ComboboxPopoverContent
+          className={cn("p-0 w-(--radix-popover-trigger-width)")}
           align='start'
           container={portalContainer}
         >
@@ -606,7 +606,7 @@ export function Combobox<T>({
               )}
             </CommandList>
           </Command>
-        </PopoverContent>
+        </ComboboxPopoverContent>
       </Popover>
     </Fragment>
   );
@@ -642,3 +642,4 @@ function useListRemoteItems<T>(
     { enabled, refreshOnOpen: remote?.refreshOnOpen === true },
   );
 }
+

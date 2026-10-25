@@ -62,6 +62,19 @@ This brings the component plus its shadcn `ui` primitives (`button`, `popover`, 
 > [!NOTE]
 > Requirements: React 18/19, Tailwind CSS (v4 recommended), a shadcn-style project with `cn` exported from `@/lib/utils`.
 
+## Demo
+
+This repo ships a live demo app (`demo/`) with Vite + Tailwind v4:
+
+```bash
+cd demo
+npm install
+npx shadcn add https://fernaandojr.github.io/advanced-combobox/r/combobox.json --overwrite
+npm run dev
+```
+
+The demo installs the item straight from the published registry (the same path a consumer takes) and covers: basic list, remote `searchOnInput` with real cache/abort behavior, multi-select with limits, client pagination, server pagination and both tree variants with cascading selection.
+
 ## Usage
 
 ### List: local options

@@ -1,14 +1,14 @@
 "use client";
 
-import { getLabelNode, getValueFromItem } from "./combobox-utils";
-import type { MenuItemConfig } from "./combobox-types";
+import { getLabelNode, getValueFromItem } from "./utils";
+import type { MenuItemConfig } from "./types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { ChevronRight, Loader2 } from "lucide-react";
 import { Fragment, useMemo } from "react";
-import { getCheckState, getChildren } from "./combobox-tree-utils";
+import { getCheckState, getChildren } from "./tree-utils";
 
 export interface TreeContentProps<T> {
   data: T[];
@@ -222,3 +222,4 @@ export function TreeContent<T>({
     </div>
   );
 }
+

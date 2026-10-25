@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Combobox } from "@/components/ui/combobox/combobox";
 import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
-import type { RemoteConfig } from "@/components/ui/combobox/combobox-types";
+import type { RemoteConfig } from "@/components/ui/combobox/types";
 
 type User = { id: number; name: string; email: string };
 
@@ -62,7 +62,7 @@ function fakeCityRemote(failOnCall: number): RemoteConfig<(typeof cities)[number
     identifier: "demo-cities",
     searchOnInput: true,
     minimumSearchLength: 2,
-    optionsFn: async (searchValue, signal) => {
+    optionsFn: async (searchValue?: string, signal?: AbortSignal) => {
       calls += 1;
       await delay(400);
       if (failOnCall > 0 && calls >= failOnCall) throw { status: 403 };
@@ -117,7 +117,7 @@ function BasicList() {
           clearOptionLabel='Limpar seleção'
           options={users}
           menuItemConfig={{ value: "id", label: ["name", "email"], searchProperties: ["name"] }}
-          onChange={setOwner}
+          onChange={(value) => setOwner((value ?? null) as number | null)}
         />
       </div>
       <StateLine value={owner} />
@@ -145,7 +145,7 @@ function RemoteSearch() {
           emptyMessage='Nenhuma cidade encontrada'
           remote={remote}
           menuItemConfig={{ value: "code", label: ["displayName"] }}
-          onChange={setCity}
+          onChange={(_, item) => setCity(Array.isArray(item) ? null : item)}
         />
       </div>
       <StateLine value={city} />
@@ -170,9 +170,8 @@ function MultipleSelection() {
           menuItemConfig={{ value: "value", label: ["label"] }}
           multipleConfig={{ maxSelection: 2, maxVisibleItems: 1 }}
           value={selected}
-          onChange={setSelected}
+          onChange={(value) => setSelected((value ?? []) as number[])}
           onMaxSelectionReached={() => setLimitHit(true)}
-          onSelectedItemResolved={undefined}
         />
       </div>
       {limitHit && <p className='text-sm text-destructive'>Max selection reached!</p>}
@@ -300,6 +299,9 @@ function TreeVariants() {
 
 function States() {
   const [invalid, setInvalid] = useState("sale-order.edit");
+  const permissions: { code: string; name: string }[] = [
+    { code: "sale-order.edit", name: "Edit sale order" },
+  ];
   return (
     <Section title='Disabled, error, clear button' description='Static presentation states.'>
       <div className='flex flex-wrap gap-4 items-start max-w-screen-md'>
@@ -312,9 +314,9 @@ function States() {
         <Combobox
           label='Persistence error'
           showClearButton
-          value='sale-order.edit'
-          onChange={setInvalid}
-          options={[]}
+          value={invalid}
+          onChange={(value) => setInvalid((value ?? "") as string)}
+          options={permissions}
           error
           menuItemConfig={{ value: "code", label: ["name"] }}
         />
