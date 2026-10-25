@@ -15,7 +15,7 @@ import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { Fragment, useCallback, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_CLEAR_BUTTON_LABEL,
   DEFAULT_CLEAR_OPTION_LABEL,
@@ -97,6 +97,7 @@ export function Combobox<T>({
   emptyMessage,
   loadingMessage,
   remoteErrorMessage,
+  minimumSearchMessage,
   value: controlledValue,
   onChange,
   onSelectedItemResolved,
@@ -151,6 +152,11 @@ export function Combobox<T>({
     : remoteError
       ? (remoteErrorMessage ?? DEFAULT_REMOTE_ERROR_MESSAGE)
       : (emptyMessage ?? DEFAULT_EMPTY_MESSAGE);
+  const minimumSearchLength = Math.max(1, remote?.minimumSearchLength ?? 1);
+  const belowMinimumSearch =
+    remote?.searchOnInput === true && searchValue.trim().length < minimumSearchLength;
+  const minimumSearchText =
+    minimumSearchMessage ?? `Type at least ${minimumSearchLength} characters to search`;
 
   const valueSingle = useMemo(() => {
     if (!isControlled) return internalSingle;
@@ -202,9 +208,20 @@ export function Combobox<T>({
   );
   const selectedOption = isMulti ? null : selectedEntry?.option ?? null;
 
+  const lastResolvedKey = useRef<string | null>(null);
+
   useEffect(() => {
-    if (isMulti || !hasSingleValue(valueSingle)) return;
-    if (selectedEntry) onSelectedItemResolved?.(selectedEntry.item);
+    if (isMulti || !hasSingleValue(valueSingle)) {
+      lastResolvedKey.current = null;
+      return;
+    }
+    if (!selectedEntry) return;
+    // Notify at most once per resolved value: inline callbacks that change
+    // identity every render must not re-trigger effect loops.
+    const key = String(selectedEntry.option.value);
+    if (lastResolvedKey.current === key) return;
+    lastResolvedKey.current = key;
+    onSelectedItemResolved?.(selectedEntry.item);
   }, [isMulti, onSelectedItemResolved, selectedEntry, valueSingle]);
 
   const selectedValues = useMemo((): ComboboxValueType<T>[] => {
@@ -495,6 +512,10 @@ export function Combobox<T>({
                   {remoteError ? (
                     <div role='alert' className='px-3 py-4 text-sm text-muted-foreground'>
                       {remoteErrorMessage ?? DEFAULT_REMOTE_ERROR_MESSAGE}
+                    </div>
+                  ) : belowMinimumSearch && optionEntries.length === 0 ? (
+                    <div role='status' className='px-3 py-4 text-sm text-muted-foreground'>
+                      {minimumSearchText}
                     </div>
                   ) : (
                     <CommandEmpty>{emptyText}</CommandEmpty>

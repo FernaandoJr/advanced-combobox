@@ -334,8 +334,9 @@ function Playground() {
         },
       };
 
-  const handleSingleChange = (value: string | null | undefined, item: unknown) => {
-    setSingleValue((value ?? null) as string | null);
+  const handleSingleChange = (value: string | string[] | null | undefined, item: unknown) => {
+    const scalar = typeof value === "string" || typeof value === "number" ? value : null;
+    setSingleValue((scalar ?? null) as string | null);
     setSelectedItem(Array.isArray(value) ? null : item);
   };
 

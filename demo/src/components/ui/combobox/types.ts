@@ -141,6 +141,8 @@ export interface ComboboxProps<T> {
   emptyMessage?: string;
   /** Message shown while loading remote data. Defaults to "Loading...". */
   loadingMessage?: string;
+  /** Hint shown while the search text is shorter than remote.minimumSearchLength (searchOnInput only). */
+  minimumSearchMessage?: string;
   /** Message shown when loading remote data fails. */
   remoteErrorMessage?: string;
   /** Label text for the combobox trigger (associated via htmlFor/id). */
