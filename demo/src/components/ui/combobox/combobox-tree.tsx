@@ -289,7 +289,7 @@ export function ComboboxTree<T>({
   return (
     <Fragment>
       {labelProp && (
-        <Label htmlFor={generatedId} className='flex items-center gap-2'>
+        <Label htmlFor={generatedId} className='mb-1.5 flex items-center gap-2'>
           {labelProp}
           {required && <span className='text-destructive'>*</span>}
         </Label>
@@ -395,4 +395,5 @@ export function ComboboxTree<T>({
     </Fragment>
   );
 }
+
 

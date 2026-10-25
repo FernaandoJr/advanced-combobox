@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/command";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
@@ -413,7 +414,7 @@ export function Combobox<T>({
   return (
     <Fragment>
       {labelProp && (
-        <Label htmlFor={id} className='flex items-center gap-2'>
+        <Label htmlFor={id} className='mb-1.5 flex items-center gap-2'>
           {labelProp}
           {required && <span className='text-destructive'>*</span>}
         </Label>
@@ -484,7 +485,13 @@ export function Combobox<T>({
           align='start'
           container={portalContainer}
         >
-          <Command shouldFilter={!paginationEnabled && remote?.searchOnInput !== true}>
+          <Command
+            shouldFilter={!paginationEnabled && remote?.searchOnInput !== true}
+            className={cn(
+              "grid max-h-[min(300px,var(--radix-popover-content-available-height))]",
+              searchInput ? "grid-rows-[auto_minmax(0,1fr)]" : "grid-rows-[minmax(0,1fr)]",
+            )}
+          >
             {searchInput ? (
               <CommandInput
                 placeholder={searchText}
@@ -492,13 +499,13 @@ export function Combobox<T>({
                 onValueChange={controlledSearchEnabled ? handleSearchValueChange : undefined}
               />
             ) : null}
-            <CommandList
-              className={cn(
-                "min-h-0 max-h-[min(300px,var(--radix-popover-content-available-height,300px))] overflow-x-hidden overflow-y-auto scroll-py-1 pr-0.5",
-              )}
+            <ScrollArea
+              type='scroll'
+              className='min-h-0 overscroll-contain'
               onWheel={(e) => e.stopPropagation()}
               onTouchMove={(e) => e.stopPropagation()}
             >
+              <CommandList className='max-h-none overflow-visible scroll-py-1 pr-0.5'>
               {isInitialRemoteLoading ? (
                 <div
                   className='flex items-center justify-center gap-2 px-3 py-6 text-sm text-muted-foreground'
@@ -626,6 +633,7 @@ export function Combobox<T>({
                 </>
               )}
             </CommandList>
+            </ScrollArea>
           </Command>
         </ComboboxPopoverContent>
       </Popover>
@@ -663,4 +671,5 @@ function useListRemoteItems<T>(
     { enabled, refreshOnOpen: remote?.refreshOnOpen === true },
   );
 }
+
 

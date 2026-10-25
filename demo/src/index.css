@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./rb/rb.css";
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -121,4 +122,31 @@
   body {
     @apply bg-background text-foreground;
     }
+}
+/* ==== shadcn-token bridge onto the copied React Bits tokens (rb.css) ==== */
+:root {
+  --background: var(--bg-body);
+  --foreground: var(--text-primary);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-ghost);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--surface-ghost);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-ghost);
+  --accent-foreground: var(--text-primary);
+  --destructive: #e5484d;
+  --border: var(--border-primary);
+  --input: var(--border-primary);
+  --ring: var(--color-accent);
+  --radius: var(--radius-sm);
+}
+
+:root[data-theme='light'] {
+  --background: var(--bg-body);
+  --border: var(--border-primary);
 }
