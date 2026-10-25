@@ -51,7 +51,7 @@ npx shadcn add @advanced-combobox/combobox
 Or by raw URL, no configuration needed:
 
 ```bash
-npx shadcn add https://raw.githubusercontent.com/FernaandoJr/advanced-combobox/main/public/r/combobox.json
+npx shadcn add https://fernaandojr.github.io/advanced-combobox/r/combobox.json
 ```
 
 This brings the component plus its shadcn `ui` primitives (`button`, `popover`, `command`, `checkbox`, `label`, `collapsible`, `input-group`, `scroll-area`, `tooltip`) and deps (`cmdk`, `lucide-react`) into **your** codebase — edit anything afterwards.
