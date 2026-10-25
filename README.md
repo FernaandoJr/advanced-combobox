@@ -10,7 +10,7 @@
 
 ⭐ If you like this project, star it on GitHub!
 
-[Features](#features) • [Install](#install) • [Usage](#usage) • [Props](#props) • [Development](#development)
+[Features](#features) • [Install](#install) • [Usage](#usage) • [API Reference](#api-reference) • [Development](#development)
 
 </div>
 
@@ -139,28 +139,14 @@ const regions = [
 />
 ```
 
-## Props
+## API Reference
 
-| Prop | Description |
-| --- | --- |
-| `options` / `remote` | Local items or remote config (`identifier`, `optionsFn`, `searchOnInput`, `minimumSearchLength`, `disableLazyFetch`, `refreshOnOpen`) |
-| `menuItemConfig` | Maps item → `value` key, `label` keys / `customLabel`, search keys, disabled predicate, `customStartNode` |
-| `selectedItemConfig` | Overrides the trigger label only (`label`, `customLabel`, `customStartNode`, `multipleSeparator`) |
-| `multiple` / `multipleConfig` | Multi-select with `maxSelection` and `maxVisibleItems` (+N overflow) |
-| `pagination` | `pageSize`, `loadMoreLabel`, `mode: "client" \| "server"` with `onLoadMore` / `onSearchChange` / `hasMore` |
-| `value` / `onChange` | Controlled value; `onChange(value, item)`; `value` is `null` when cleared |
-| Form | `label`, `required`, `error`, `id`, `name`, `aria-describedby`, `aria-invalid`, `onBlur` |
-| Labels | `placeholder`, `searchPlaceholder`, `emptyMessage`, `loadingMessage`, `remoteErrorMessage`, `clearOptionLabel`, `clearButtonLabel` (tree: `expandAllLabel`, `collapseAllLabel`) |
-| Tree | `data`, `flatParentKey`, `rootParentValues`, `multipleConfig` |
+Every prop of both variants is fully documented with type, default and semantics:
 
-### Remote data model
+- [`docs/combobox.md`](docs/combobox.md): `<Combobox />` and the `remote`, `menuItemConfig`, `pagination`, `multipleConfig` and `selectedItemConfig` configs, plus callbacks and remote request semantics (caching, cancellation, retries).
+- [`docs/combobox-tree.md`](docs/combobox-tree.md): `<ComboboxTree />` with flat/nested data joining, cascading selection and search behavior.
 
-- Fetches lazily when the dropdown opens (or on mount with `disableLazyFetch`).
-- Cached **per identifier** (+ search text when `searchOnInput`), in a cache shared by every mounted instance: two fields using the same identifier never fetch twice.
-- `refreshOnOpen: true` revalidates on every open instead.
-- Errors clear the cache, so the next open tries again; transient failures retry twice, auth/permission (401/403) never retry.
-- Superseded requests are aborted and never write stale state or cache: changing the search text can't leak an older response into the list.
-- Concurrent searches cancel the previous request via `AbortSignal`.
+The same reference ships inside the registry item (`docs` field), so `shadcn view` shows it after install too.
 
 ## Development
 

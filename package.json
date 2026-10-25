@@ -7,8 +7,8 @@
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "registry:build": "shadcn build --output public/r",
-    "registry:check": "shadcn build --output public/r && git diff --exit-code -- public/r"
+    "registry:build": "shadcn build --output public/r && node scripts/inject-docs.mjs",
+    "registry:check": "npm run registry:build && git diff --exit-code -- public/r"
   },
   "dependencies": {
     "cmdk": "^1.1.1",
