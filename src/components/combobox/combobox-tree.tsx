@@ -395,5 +395,3 @@ export function ComboboxTree<T>({
     </Fragment>
   );
 }
-
-
