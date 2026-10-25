@@ -2,7 +2,7 @@
   "name": "advanced-combobox",
   "version": "0.1.0",
   "private": true,
-  "description": "Reusable, shadcn-registry-compatible Combobox (list & tree) — installable with `npx shadcn add`.",
+  "description": "Reusable, shadcn-registry-compatible Combobox (list & tree), installable with `npx shadcn add`.",
   "license": "MIT",
   "scripts": {
     "test": "vitest run",

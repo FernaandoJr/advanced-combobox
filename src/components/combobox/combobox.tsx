@@ -76,7 +76,7 @@ function hasFallbackLabel(label: ReactNode): boolean {
 
 /**
  * Defers onChange so the popover unmounts before consumers re-render (e.g. a
- * react-hook-form validation state swap) — avoids a visible flicker/teardown race.
+ * react-hook-form validation state swap) to avoid a visible flicker/teardown race.
  */
 function deferSingleSelectChange(callback: () => void) {
   window.setTimeout(callback, 0);

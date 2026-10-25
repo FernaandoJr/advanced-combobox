@@ -1,7 +1,7 @@
 <div align="center">
 
 # Advanced Combobox
-*A list & tree combobox for the shadcn registry — simple, light, performatic, reusable.*
+*A list & tree combobox for the shadcn registry. Simple, light, performatic, reusable.*
 
 [![CI](https://img.shields.io/github/actions/workflow/status/FernaandoJr/advanced-combobox/ci.yml?branch=main&style=flat-square)](https://github.com/FernaandoJr/advanced-combobox/actions)
 [![shadcn registry](https://img.shields.io/badge/shadcn-registry-blue?style=flat-square)](#install)
@@ -16,19 +16,19 @@
 
 ---
 
-One `npx shadcn add` copies the **source code** into your project, exactly like shadcn/ui does — no npm package to update, no wrappers to fight. The component is fully decoupled: **zero runtime dependencies** beyond React, all strings configurable via props, and the shadcn primitives it builds on are pulled in as registry dependencies.
+One `npx shadcn add` copies the **source code** into your project, exactly like shadcn/ui does. No npm package to update, no wrappers to fight. The component is fully decoupled: **zero runtime dependencies** beyond React, all strings configurable via props, and the shadcn primitives it builds on are pulled in as registry dependencies.
 
 > [!TIP]
-> **No generics needed at the call site.** Just use `<Combobox>`. The item type `T` is inferred from the patterns you pass in — the `options` array or the return type of `remote.optionsFn` — and flows into `value`, `onChange` and `menuItemConfig` automatically.
+> **No generics needed at the call site.** Just use `<Combobox>`. The item type `T` is inferred from the `options` array or the return type of `remote.optionsFn`, and flows into `value`, `onChange` and `menuItemConfig` automatically.
 
 ## Features
 
-- 📋 **List combobox** — single/multi selection, clear option & inline clear button, error state, required indicator, form-ready (`id`/`name`/`aria-*`)
-- 🌳 **Tree combobox** — flat data joined by a parent key *or* already nested data; cascading parent⇄descendant checkboxes; expand/collapse all; branch-preserving search
-- 🌐 **Remote options** — lazy fetch with cancellation (`AbortSignal`), `searchOnInput` mode, min-length gate, in-memory cache per identifier, retries that skip 401/403
-- 📄 **Pagination** — client-side slices or server-driven mode
-- 🕸️ **Fully inferred generics** — write `<Combobox>`, never `<Combobox<User>`; `value` types are preserved (number, string, …), controlled & uncontrolled
-- 🪶 **Light by design** — no `react-query`, no i18n lib, no HTTP client, no provider
+- 📋 **List combobox**: single/multi selection, clear option & inline clear button, error state, required indicator, form-ready (`id`/`name`/`aria-*`)
+- 🌳 **Tree combobox**: flat data joined by a parent key *or* already nested data; cascading parent⇄descendant checkboxes; expand/collapse all; branch-preserving search
+- 🌐 **Remote options**: lazy fetch with cancellation (`AbortSignal`), `searchOnInput` mode, min-length gate, in-memory cache per identifier, retries that skip 401/403
+- 📄 **Pagination**: client-side slices or server-driven mode
+- 🕸️ **Fully inferred generics**: write `<Combobox>`, never `<Combobox<User>`; `value` types are preserved (number, string, …), controlled & uncontrolled
+- 🪶 **Light by design**: no `react-query`, no i18n lib, no HTTP client, no provider
 
 ## Install
 
@@ -57,14 +57,14 @@ Or by raw URL, no configuration needed:
 npx shadcn add https://fernaandojr.github.io/advanced-combobox/r/combobox.json
 ```
 
-This brings the component plus its shadcn `ui` primitives (`button`, `popover`, `command`, `checkbox`, `label`, `collapsible`, `input-group`, `scroll-area`, `tooltip`) and deps (`cmdk`, `lucide-react`) into **your** codebase — edit anything afterwards.
+This brings the component plus its shadcn `ui` primitives (`button`, `popover`, `command`, `checkbox`, `label`, `collapsible`, `input-group`, `scroll-area`, `tooltip`) and deps (`cmdk`, `lucide-react`) into **your** codebase. Edit anything afterwards.
 
 > [!NOTE]
 > Requirements: React 18/19, Tailwind CSS (v4 recommended), a shadcn-style project with `cn` exported from `@/lib/utils`.
 
 ## Usage
 
-### List — local options
+### List: local options
 
 ```tsx
 import { Combobox } from "@/components/ui/combobox";
@@ -85,7 +85,7 @@ const users = [
 />
 ```
 
-### List — remote + multi-select + pagination
+### List: remote + multi-select + pagination
 
 ```tsx
 type Product = { code: string; sku: string; name: string };
@@ -148,7 +148,7 @@ const regions = [
 | `selectedItemConfig` | Overrides the trigger label only (`label`, `customLabel`, `customStartNode`, `multipleSeparator`) |
 | `multiple` / `multipleConfig` | Multi-select with `maxSelection` and `maxVisibleItems` (+N overflow) |
 | `pagination` | `pageSize`, `loadMoreLabel`, `mode: "client" \| "server"` with `onLoadMore` / `onSearchChange` / `hasMore` |
-| `value` / `onChange` | Controlled value; `onChange(value, item)` — `value` is `null` when cleared |
+| `value` / `onChange` | Controlled value; `onChange(value, item)`; `value` is `null` when cleared |
 | Form | `label`, `required`, `error`, `id`, `name`, `aria-describedby`, `aria-invalid`, `onBlur` |
 | Labels | `placeholder`, `searchPlaceholder`, `emptyMessage`, `loadingMessage`, `remoteErrorMessage`, `clearOptionLabel`, `clearButtonLabel` (tree: `expandAllLabel`, `collapseAllLabel`) |
 | Tree | `data`, `flatParentKey`, `rootParentValues`, `multipleConfig` |
@@ -156,7 +156,7 @@ const regions = [
 ### Remote data model
 
 - Fetches lazily when the dropdown opens (or on mount with `disableLazyFetch`).
-- Cached **per identifier** (+ search text when `searchOnInput`), in a cache shared by every mounted instance — two fields using the same identifier never fetch twice.
+- Cached **per identifier** (+ search text when `searchOnInput`), in a cache shared by every mounted instance: two fields using the same identifier never fetch twice.
 - `refreshOnOpen: true` revalidates on every open instead.
 - Errors clear the cache, so the next open tries again; transient failures retry twice, auth/permission (401/403) never retry.
 - Superseded requests are aborted and never write stale state or cache: changing the search text can't leak an older response into the list.

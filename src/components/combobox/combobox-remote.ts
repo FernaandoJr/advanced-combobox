@@ -38,7 +38,7 @@ function getErrorStatusCode(error: unknown): number | null {
  *   unless `refreshOnOpen` forces a revalidation;
  * - in-flight requests are superseded: starting a new fetch (or changing the
  *   cache key) aborts the previous one, and a superseded request never writes
- *   state or cache — stale results can never leak into the new key;
+ *   state or cache. Stale results can never leak into the new key;
  * - errors clear the cache for the key so the next enable retries; transient
  *   failures retry up to MAX_ATTEMPTS, auth/permission statuses never retry.
  */
