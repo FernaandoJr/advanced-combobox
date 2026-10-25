@@ -17,11 +17,15 @@ import {
 } from "./combobox-utils";
 import type { ComboboxTreeProps, ComboboxValueType, RemoteConfigTree } from "./combobox-types";
 import {
+  DEFAULT_COLLAPSE_ALL_LABEL,
+  DEFAULT_EMPTY_MESSAGE,
+  DEFAULT_EXPAND_ALL_LABEL,
+  DEFAULT_LOADING_MESSAGE,
+  DEFAULT_PLACEHOLDER,
   DEFAULT_REMOTE_ERROR_MESSAGE,
-  MAX_ATTEMPTS,
-  NON_RETRYABLE_STATUS,
-  getErrorStatusCode,
-} from "./combobox-remote-errors";
+  DEFAULT_SEARCH_PLACEHOLDER,
+} from "./combobox-defaults";
+import { useRemoteItems } from "./combobox-remote";
 import { Button } from "@/components/ui/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
@@ -40,79 +44,16 @@ import type { ReactNode } from "react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { TreeContent } from "./tree-content";
 
-const DEFAULT_PLACEHOLDER = "Select...";
-const DEFAULT_SEARCH_PLACEHOLDER = "Search...";
-const DEFAULT_EMPTY_MESSAGE = "No results found";
-const DEFAULT_LOADING_MESSAGE = "Loading...";
-const DEFAULT_EXPAND_ALL_LABEL = "Expand all";
-const DEFAULT_COLLAPSE_ALL_LABEL = "Collapse all";
-
-interface RemoteState<T> {
-  items: T[];
-  error: unknown | null;
-  fetching: boolean;
-}
-
-function useRemoteTreeOptions<T>(remote: RemoteConfigTree<T> | undefined, open: boolean) {
-  const remoteRef = useRef(remote);
-  remoteRef.current = remote;
-
-  const [state, setState] = useState<RemoteState<T>>({ items: [], error: null, fetching: false });
-  const abortRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef(new Map<string, T[]>());
-
-  const cacheKey = remote ? remote.identifier : "";
-  const fetchRef = useCallback(async (force = false) => {
-    const optionsFn = remoteRef.current?.optionsFn;
-    const identifier = remoteRef.current?.identifier;
-    if (!optionsFn || !identifier) return;
-    if (!force && cacheRef.current.has(identifier)) return;
-
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setState({ items: [], error: null, fetching: true });
-
-    for (let attempt = 0; ; attempt++) {
-      try {
-        const items = await optionsFn(controller.signal);
-        if (controller.signal.aborted) return;
-        cacheRef.current.set(identifier, items);
-        setState({ items, error: null, fetching: false });
-        return;
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        const status = getErrorStatusCode(error);
-        if (attempt < MAX_ATTEMPTS - 1 && !NON_RETRYABLE_STATUS.has(status ?? -1)) continue;
-        cacheRef.current.delete(identifier);
-        setState({ items: [], error, fetching: false });
-        return;
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const current = remoteRef.current;
-    if (!current) return;
-    if (current.disableLazyFetch) {
-      if (!cacheRef.current.has(cacheKey)) void fetchRef();
-      return;
-    }
-    if (!open) return;
-    if (current.refreshOnOpen) {
-      void fetchRef(true);
-      return;
-    }
-    if (!cacheRef.current.has(cacheKey)) void fetchRef();
-  }, [open, cacheKey, fetchRef]);
-
-  useEffect(() => () => abortRef.current?.abort(), []);
-
-  return {
-    items: state.fetching ? ([] as T[]) : state.items,
-    error: state.error,
-    isLoading: state.fetching,
-  };
+/** Maps the declarative tree `remote` config onto the canonical remote engine. */
+function useTreeRemoteItems<T>(remote: RemoteConfigTree<T> | undefined, open: boolean) {
+  return useRemoteItems<T>(
+    remote ? (signal) => remote.optionsFn(signal) : undefined,
+    remote ? remote.identifier : null,
+    {
+      enabled: Boolean(remote) && (open || remote?.disableLazyFetch === true),
+      refreshOnOpen: remote?.refreshOnOpen === true,
+    },
+  );
 }
 
 export function ComboboxTree<T>({
@@ -159,12 +100,12 @@ export function ComboboxTree<T>({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
-  const { items: remoteItems, error: remoteError, isLoading } = useRemoteTreeOptions(remote, open);
+  const { items: remoteItems, error: remoteError, isLoading } = useTreeRemoteItems(remote, open);
 
   const data = useMemo(() => {
-    if (remote) return remoteItems ?? [];
+    if (remote) return remoteItems;
     return dataProp ?? [];
-  }, [remote, remoteItems, dataProp]) as T[];
+  }, [remote, remoteItems, dataProp]);
 
   const valueKey = menuItemConfig.value;
   const treeChildrenKey = COMBOBOX_TREE_CHILDREN_KEY as keyof T;

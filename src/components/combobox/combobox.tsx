@@ -14,148 +14,52 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useState } from "react";
+import {
+  DEFAULT_CLEAR_BUTTON_LABEL,
+  DEFAULT_CLEAR_OPTION_LABEL,
+  DEFAULT_EMPTY_MESSAGE,
+  DEFAULT_LOAD_MORE_LABEL,
+  DEFAULT_LOADING_MESSAGE,
+  DEFAULT_PLACEHOLDER,
+  DEFAULT_REMOTE_ERROR_MESSAGE,
+  DEFAULT_SEARCH_PLACEHOLDER,
+} from "./combobox-defaults";
+import { useRemoteItems } from "./combobox-remote";
 import type {
   ComboboxOption,
   ComboboxProps,
   ComboboxValueType,
+  MenuItemConfig,
   RemoteConfig,
+  SelectedItemConfig,
 } from "./combobox-types";
-import {
-  DEFAULT_REMOTE_ERROR_MESSAGE,
-  getErrorStatusCode,
-  MAX_ATTEMPTS,
-  NON_RETRYABLE_STATUS,
-} from "./combobox-remote-errors";
 import {
   buildSearchableValue,
   getButtonLabelNode,
   getButtonLabelPlainText,
   getButtonStartNode,
-  getItemByValue,
-  getItemsByValues,
   getLabelNode,
   getRawValueFromItem,
-  getValueFromItem,
   isSameComboboxValue,
 } from "./combobox-utils";
 
-const DEFAULT_PLACEHOLDER = "Select...";
-const DEFAULT_SEARCH_PLACEHOLDER = "Search...";
-const DEFAULT_EMPTY_MESSAGE = "No results found";
-const DEFAULT_LOADING_MESSAGE = "Loading...";
-const DEFAULT_CLEAR_OPTION_LABEL = "Clear";
-const DEFAULT_CLEAR_BUTTON_LABEL = "Clear selection";
-const DEFAULT_LOAD_MORE_LABEL = "Load more";
-
-interface RemoteState<T> {
-  items: T[];
-  error: unknown | null;
-  fetching: boolean;
+interface OptionEntry<T> {
+  option: ComboboxOption<ComboboxValueType<T>>;
+  item: T;
 }
 
-/**
- * Lightweight remote options loader:
- * - cache-first (per remote identifier + search text) so reopening is instant;
- * - AbortController per request; new searches cancel the previous one;
- * - retries twice on transient failures (never on 401/403);
- * - errors clear the cache so the next open tries again.
- */
-function useRemoteOptions<T>(
-  remote: RemoteConfig<T> | undefined,
-  searchValue: string,
-  open: boolean,
-) {
-  const remoteRef = useRef(remote);
-  remoteRef.current = remote;
-
-  const [state, setState] = useState<RemoteState<T>>({ items: [], error: null, fetching: false });
-  const abortRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef(new Map<string, T[]>());
-
-  const searchOnInput = remote?.searchOnInput === true;
-  const normalizedSearchValue = searchValue.trim();
-  const minimumSearchLength = Math.max(1, remote?.minimumSearchLength ?? 1);
-  const canSearchRemotely = normalizedSearchValue.length >= minimumSearchLength;
-  const cacheKey = remote
-    ? searchOnInput
-      ? `${remote.identifier}:${normalizedSearchValue}`
-      : remote.identifier
-    : "";
-
-  const fetchForKey = useCallback(
-    async (key: string, searchText: string | undefined, force = false) => {
-      const optionsFn = remoteRef.current?.optionsFn;
-      if (!optionsFn) return;
-      if (!force && cacheRef.current.has(key)) return;
-
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setState({ items: [], error: null, fetching: true });
-
-      for (let attempt = 0; ; attempt++) {
-        try {
-          const items = await optionsFn(searchText, controller.signal);
-          if (controller.signal.aborted) return;
-          cacheRef.current.set(key, items);
-          setState({ items, error: null, fetching: false });
-          return;
-        } catch (error) {
-          if (controller.signal.aborted) return;
-          const status = getErrorStatusCode(error);
-          if (attempt < MAX_ATTEMPTS - 1 && !NON_RETRYABLE_STATUS.has(status ?? -1)) continue;
-          cacheRef.current.delete(key);
-          setState({ items: [], error, fetching: false });
-          return;
-        }
-      }
-    },
-    [],
-  );
-
-  // Swap the displayed state when the cache key changes (new remote or new search text).
-  useEffect(() => {
-    if (!remoteRef.current) return;
-    const cached = cacheRef.current.get(cacheKey);
-    setState({ items: cached ?? [], error: null, fetching: false });
-  }, [cacheKey]);
-
-  useEffect(() => {
-    const current = remoteRef.current;
-    if (!current) return;
-    if (current.disableLazyFetch && current.searchOnInput !== true) {
-      if (!cacheRef.current.has(cacheKey)) {
-        void fetchForKey(cacheKey, undefined);
-      }
-      return;
-    }
-    if (!open) return;
-    if (searchOnInput && !canSearchRemotely) return;
-    const searchText = searchOnInput ? normalizedSearchValue : undefined;
-    if (current.refreshOnOpen) {
-      void fetchForKey(cacheKey, searchText, true);
-      return;
-    }
-    if (!cacheRef.current.has(cacheKey)) {
-      void fetchForKey(cacheKey, searchText);
-    }
-  }, [
-    open,
-    cacheKey,
-    canSearchRemotely,
-    searchOnInput,
-    normalizedSearchValue,
-    fetchForKey,
-  ]);
-
-  useEffect(() => () => abortRef.current?.abort(), []);
-
-  return {
-    items: state.fetching ? ([] as T[]) : state.items,
-    error: state.error,
-    isLoading: state.fetching,
-  };
+/** Trigger label layout shared by single and multi selection modes. */
+function TriggerLabel({ label, startNode }: { label: ReactNode; startNode?: ReactNode | null }) {
+  if (startNode) {
+    return (
+      <span className='flex min-w-0 items-center gap-2 py-0.5'>
+        <span className='shrink-0 flex items-center'>{startNode}</span>
+        <span className='min-w-0 truncate'>{label}</span>
+      </span>
+    );
+  }
+  return <span className='min-w-0 truncate block'>{label}</span>;
 }
 
 function hasSingleValue(value: unknown): boolean {
@@ -170,6 +74,10 @@ function hasFallbackLabel(label: ReactNode): boolean {
   return true;
 }
 
+/**
+ * Defers onChange so the popover unmounts before consumers re-render (e.g. a
+ * react-hook-form validation state swap) — avoids a visible flicker/teardown race.
+ */
 function deferSingleSelectChange(callback: () => void) {
   window.setTimeout(callback, 0);
 }
@@ -224,11 +132,11 @@ export function Combobox<T>({
     undefined,
   );
   const [internalMulti, setInternalMulti] = useState<ComboboxValueType<T>[]>([]);
-  const {
-    items: remoteItems,
-    error: remoteError,
-    isLoading,
-  } = useRemoteOptions<T>(remote, searchValue, open);
+  const { items: remoteItems, error: remoteError, isLoading } = useListRemoteItems(
+    remote,
+    searchValue,
+    open,
+  );
 
   const isMulti = multiple === true;
   const isControlled = controlledValue !== undefined;
@@ -248,77 +156,67 @@ export function Combobox<T>({
     return Array.isArray(controlledValue) ? undefined : (controlledValue ?? undefined);
   }, [isControlled, controlledValue, internalSingle]);
 
-  const { allOptions, allItems } = useMemo(() => {
-    let opts: ComboboxOption<ComboboxValueType<T>>[] = [];
-    let items: T[] | undefined;
-    if (options && options.length > 0) {
-      const list = options as T[];
-      opts = list.map((item) => ({
-        value: getRawValueFromItem(item, itemConfig.value),
-        label: getLabelNode(item, itemConfig),
-        searchableValue: buildSearchableValue(item, searchKeys),
-      }));
-      items = list;
-    }
-
-    if (remote && remoteItems.length > 0) {
-      const list = remoteItems as T[];
-      opts = list.map((item) => ({
-        value: getRawValueFromItem(item, itemConfig.value),
-        label: getLabelNode(item, itemConfig),
-        searchableValue: buildSearchableValue(item, searchKeys),
-      }));
-      items = list;
-    }
-    return { allOptions: opts, allItems: items };
-  }, [options, remoteItems, remote, itemConfig, searchKeys]);
-  const isInitialRemoteLoading = Boolean(remote && isLoading && allOptions.length === 0);
+  // Option and its source item resolved together in one O(n) pass over the data.
+  // options win over remote items when both are provided and non-empty.
+  const optionEntries = useMemo(
+    (): OptionEntry<T>[] =>
+      (options && options.length > 0 ? options : remoteItems).map((item) => ({
+        option: {
+          value: getRawValueFromItem(item, itemConfig.value),
+          label: getLabelNode(item, itemConfig),
+          searchableValue: buildSearchableValue(item, searchKeys),
+        },
+        item,
+      })),
+    [options, remoteItems, itemConfig, searchKeys],
+  );
+  const isInitialRemoteLoading = Boolean(remote && isLoading && optionEntries.length === 0);
   const paginationEnabled = Boolean(pagination);
   const serverPaginationEnabled = pagination?.mode === "server";
   const controlledSearchEnabled = paginationEnabled || remote?.searchOnInput === true;
   const paginationPageSize = pagination ? Math.max(1, pagination.pageSize) : 0;
   const [visibleOptionCount, setVisibleOptionCount] = useState(paginationPageSize);
-  const filteredOptions = useMemo(() => {
-    if (!paginationEnabled) return allOptions;
-    if (serverPaginationEnabled) return allOptions;
+  const filteredEntries = useMemo(() => {
+    if (!paginationEnabled || serverPaginationEnabled) return optionEntries;
     const query = searchValue.trim().toLowerCase();
-    if (!query) return allOptions;
-    return allOptions.filter((option) =>
-      `${String(option.value)} ${option.searchableValue ?? ""}`.toLowerCase().includes(query),
+    if (!query) return optionEntries;
+    return optionEntries.filter((entry) =>
+      `${String(entry.option.value)} ${entry.option.searchableValue ?? ""}`
+        .toLowerCase()
+        .includes(query),
     );
-  }, [allOptions, paginationEnabled, searchValue, serverPaginationEnabled]);
+  }, [optionEntries, paginationEnabled, serverPaginationEnabled, searchValue]);
   const effectiveVisibleOptionCount = Math.max(paginationPageSize, visibleOptionCount);
-  const visibleOptions =
+  const visibleEntries =
     paginationEnabled && !serverPaginationEnabled
-      ? filteredOptions.slice(0, effectiveVisibleOptionCount)
-      : filteredOptions;
+      ? filteredEntries.slice(0, effectiveVisibleOptionCount)
+      : filteredEntries;
   const hasMoreOptions = serverPaginationEnabled
     ? Boolean(pagination?.hasMore)
-    : paginationEnabled && effectiveVisibleOptionCount < filteredOptions.length;
+    : paginationEnabled && effectiveVisibleOptionCount < filteredEntries.length;
 
-  const selectedOption = useMemo(() => {
-    if (!isMulti)
-      return allOptions.find((opt) => isSameComboboxValue(opt.value, valueSingle)) ?? null;
-    return null;
-  }, [allOptions, valueSingle, isMulti]);
-  const resolvedSingleItem = useMemo(
-    () =>
-      selectedOption ? getItemByValue(String(selectedOption.value), allOptions, allItems) : null,
-    [allItems, allOptions, selectedOption],
+  const selectedEntry = useMemo(
+    () => optionEntries.find((entry) => isSameComboboxValue(entry.option.value, valueSingle)) ?? null,
+    [optionEntries, valueSingle],
   );
+  const selectedOption = isMulti ? null : selectedEntry?.option ?? null;
 
   useEffect(() => {
     if (isMulti || !hasSingleValue(valueSingle)) return;
-    if (resolvedSingleItem) onSelectedItemResolved?.(resolvedSingleItem);
-  }, [isMulti, onSelectedItemResolved, resolvedSingleItem, valueSingle]);
+    if (selectedEntry) onSelectedItemResolved?.(selectedEntry.item);
+  }, [isMulti, onSelectedItemResolved, selectedEntry, valueSingle]);
 
   const selectedValues = useMemo((): ComboboxValueType<T>[] => {
     if (!isMulti) return [];
     return isControlled ? (Array.isArray(controlledValue) ? controlledValue : []) : internalMulti;
   }, [isMulti, isControlled, controlledValue, internalMulti]);
-  const selectedItems = useMemo(
-    () => (isMulti ? getItemsByValues(selectedValues, allOptions, allItems) : []),
-    [isMulti, selectedValues, allOptions, allItems],
+  // Entries in the same order as selectedValues (order the selection was built).
+  const selectedEntries = useMemo(
+    () =>
+      selectedValues
+        .map((value) => optionEntries.find((entry) => isSameComboboxValue(entry.option.value, value)))
+        .filter((entry): entry is OptionEntry<T> => entry != null),
+    [selectedValues, optionEntries],
   );
   const showInlineClearButton =
     showClearButton === true && !isMulti && !disabled && hasSingleValue(valueSingle);
@@ -332,10 +230,13 @@ export function Combobox<T>({
     }
   };
 
-  const handleChange = (valueStr: string) => {
-    const option = allOptions.find((o) => String(o.value) === valueStr);
-    if (!option) return;
+  const resolveItems = (values: ComboboxValueType<T>[]): T[] =>
+    values.flatMap((value) => {
+      const entry = optionEntries.find((e) => isSameComboboxValue(e.option.value, value));
+      return entry ? [entry.item] : [];
+    });
 
+  const handleChange = (option: ComboboxOption<ComboboxValueType<T>>, item: T) => {
     if (isMulti) {
       const withoutOption = selectedValues.filter((v) => !isSameComboboxValue(v, option.value));
       const isRemoving = withoutOption.length < selectedValues.length;
@@ -348,15 +249,13 @@ export function Combobox<T>({
       }
       const next = isRemoving ? withoutOption : [...withoutOption, option.value];
       if (!isControlled) setInternalMulti(next);
-      onChange?.(next, getItemsByValues(next, allOptions, allItems));
+      onChange?.(next, resolveItems(next));
     } else {
-      const newValue = option.value;
-      if (!isControlled) setInternalSingle(newValue);
+      if (!isControlled) setInternalSingle(option.value);
       resetSearchState();
       setOpen(false);
-      const selectedItem = getItemByValue(valueStr, allOptions, allItems);
       deferSingleSelectChange(() => {
-        onChange?.(newValue as ComboboxValueType<T>, selectedItem);
+        onChange?.(option.value, item);
       });
     }
   };
@@ -393,35 +292,23 @@ export function Combobox<T>({
   const buttonContent = useMemo<ReactNode>(() => {
     if (isMulti) {
       if (selectedValues.length === 0) return placeholder || "";
-      if (selectedItems.length < selectedValues.length && hasFallbackLabel(selectedFallbackLabel)) {
+      if (selectedEntries.length < selectedValues.length && hasFallbackLabel(selectedFallbackLabel)) {
         return <FallbackLabel>{selectedFallbackLabel}</FallbackLabel>;
       }
-      if (selectedValues.length === 1) {
-        const item = selectedItems[0];
-        if (!item) {
-          if (hasFallbackLabel(selectedFallbackLabel)) {
-            return <FallbackLabel>{selectedFallbackLabel}</FallbackLabel>;
-          }
-          return placeholder || "";
-        }
+      if (selectedEntries.length === 1) {
+        const { item } = selectedEntries[0];
         const buttonLabel = getButtonLabelNode(item, itemConfig, selectedItemConfig);
         const buttonStartNode = getButtonStartNode(item, itemConfig, selectedItemConfig);
-        if (buttonStartNode) {
-          return (
-            <span className='flex min-w-0 items-center gap-2 py-0.5'>
-              <span className='shrink-0 flex items-center'>{buttonStartNode}</span>
-              <span className='min-w-0 truncate'>{buttonLabel}</span>
-            </span>
-          );
-        }
-        return <span className='min-w-0 truncate block'>{buttonLabel}</span>;
+        return <TriggerLabel label={buttonLabel} startNode={buttonStartNode} />;
       }
       const maxVisibleItems = multipleConfig?.maxVisibleItems;
-      const itemsToShow = maxVisibleItems ? selectedItems.slice(0, maxVisibleItems) : selectedItems;
+      const entriesToShow = maxVisibleItems
+        ? selectedEntries.slice(0, maxVisibleItems)
+        : selectedEntries;
       const itemsSeparator = selectedItemConfig?.multipleSeparator;
       const overflowCount =
-        maxVisibleItems && selectedItems.length > maxVisibleItems
-          ? selectedItems.length - maxVisibleItems
+        maxVisibleItems && selectedEntries.length > maxVisibleItems
+          ? selectedEntries.length - maxVisibleItems
           : 0;
 
       return (
@@ -431,11 +318,10 @@ export function Combobox<T>({
             !itemsSeparator && "gap-1",
           )}
         >
-          {itemsToShow.map((item, index) => {
+          {entriesToShow.map(({ item, option }, index) => {
             const label = getButtonLabelNode(item, itemConfig, selectedItemConfig);
-            const value = getValueFromItem(item, itemConfig.value);
             return (
-              <span key={value} className='flex min-w-0 items-center'>
+              <span key={String(option.value)} className='flex min-w-0 items-center'>
                 {index > 0 && itemsSeparator && (
                   <span className='mx-1 text-muted-foreground'>{itemsSeparator}</span>
                 )}
@@ -449,33 +335,24 @@ export function Combobox<T>({
         </span>
       );
     }
-    if (!selectedOption) {
+    if (!selectedEntry) {
       if (hasSingleValue(valueSingle) && hasFallbackLabel(selectedFallbackLabel)) {
         return <FallbackLabel>{selectedFallbackLabel}</FallbackLabel>;
       }
       return placeholder || "";
     }
-    const selectedItem = getItemByValue(String(selectedOption.value), allOptions, allItems);
-    if (!selectedItem)
-      return <span className='min-w-0 truncate block'>{selectedOption.label}</span>;
-    const buttonLabel = getButtonLabelNode(selectedItem, itemConfig, selectedItemConfig);
-    const buttonStartNode = getButtonStartNode(selectedItem, itemConfig, selectedItemConfig);
-    if (buttonStartNode) {
-      return (
-        <span className='flex min-w-0 items-center gap-2 py-0.5'>
-          <span className='shrink-0 flex items-center'>{buttonStartNode}</span>
-          <span className='min-w-0 truncate'>{buttonLabel}</span>
-        </span>
-      );
-    }
-    return <span className='min-w-0 truncate block'>{buttonLabel}</span>;
+    return (
+      <TriggerLabel
+        label={getButtonLabelNode(selectedEntry.item, itemConfig, selectedItemConfig)}
+        startNode={getButtonStartNode(selectedEntry.item, itemConfig, selectedItemConfig)}
+      />
+    );
   }, [
     isMulti,
-    selectedOption,
+    selectedEntry,
     selectedValues,
-    selectedItems,
-    allOptions,
-    allItems,
+    selectedEntries,
+    optionEntries,
     itemConfig,
     selectedItemConfig,
     multipleConfig,
@@ -486,33 +363,29 @@ export function Combobox<T>({
 
   const buttonTitle = useMemo(() => {
     if (isMulti) {
-      if (selectedValues.length > 0 && selectedItems.length < selectedValues.length) {
+      if (selectedValues.length > 0 && selectedEntries.length < selectedValues.length) {
         return typeof selectedFallbackLabel === "string" ? selectedFallbackLabel : undefined;
       }
-      if (selectedItems.length === 0) return undefined;
-      const parts = selectedItems
-        .map((item) => getButtonLabelPlainText(item, itemConfig, selectedItemConfig))
+      if (selectedEntries.length === 0) return undefined;
+      const parts = selectedEntries
+        .map(({ item }) => getButtonLabelPlainText(item, itemConfig, selectedItemConfig))
         .filter((value): value is string => Boolean(value));
       if (parts.length === 0) return undefined;
       return parts.join(selectedItemConfig?.multipleSeparator ?? ", ");
     }
 
-    if (!selectedOption) {
+    if (!selectedEntry) {
       if (hasSingleValue(valueSingle)) {
         return typeof selectedFallbackLabel === "string" ? selectedFallbackLabel : undefined;
       }
       return undefined;
     }
-    const selectedItem = getItemByValue(String(selectedOption.value), allOptions, allItems);
-    if (!selectedItem) return undefined;
-    return getButtonLabelPlainText(selectedItem, itemConfig, selectedItemConfig);
+    return getButtonLabelPlainText(selectedEntry.item, itemConfig, selectedItemConfig);
   }, [
     isMulti,
-    selectedItems,
-    selectedOption,
+    selectedEntries,
+    selectedEntry,
     selectedValues,
-    allOptions,
-    allItems,
     itemConfig,
     selectedItemConfig,
     selectedFallbackLabel,
@@ -628,7 +501,8 @@ export function Combobox<T>({
                   )}
                   {!isMulti && showClearOption ? (
                     <CommandItem
-                      value={`__clear__|||${clearOptionText}`}
+                      value='__combobox-clear__'
+                      keywords={[clearOptionText]}
                       className='min-w-0 cursor-pointer'
                       onSelect={() => handleClearSelection()}
                     >
@@ -641,20 +515,10 @@ export function Combobox<T>({
                       />
                     </CommandItem>
                   ) : null}
-                  {visibleOptions.map((option) => {
+                  {visibleEntries.map(({ option, item }) => {
                     const valueStr = String(option.value);
-                    const item = getItemByValue(valueStr, allOptions, allItems);
-                    const optionDisabled =
-                      item && itemConfig.isOptionDisabled
-                        ? itemConfig.isOptionDisabled(item)
-                        : false;
-                    const startNode =
-                      item && itemConfig.customStartNode ? itemConfig.customStartNode(item) : null;
-                    const searchableValue = option.searchableValue || "";
-                    const commandValue = searchableValue
-                      ? `${valueStr}|||${searchableValue}`
-                      : valueStr;
-                    const actualValue = (v: string) => (v.includes("|||") ? v.split("|||")[0] : v);
+                    const optionDisabled = itemConfig.isOptionDisabled?.(item) ?? false;
+                    const startNode = itemConfig.customStartNode?.(item) ?? null;
 
                     if (isMulti) {
                       const checked = selectedValues.some((v) =>
@@ -663,15 +527,16 @@ export function Combobox<T>({
                       return (
                         <CommandItem
                           key={valueStr}
-                          value={commandValue}
+                          value={valueStr}
+                          keywords={option.searchableValue ? [option.searchableValue] : undefined}
                           disabled={optionDisabled}
                           className={cn(
                             "min-w-0 cursor-pointer",
                             optionDisabled && "cursor-not-allowed",
                           )}
-                          onSelect={(currentValue) => {
+                          onSelect={() => {
                             if (optionDisabled) return;
-                            handleChange(actualValue(currentValue));
+                            handleChange(option, item);
                           }}
                           aria-selected={checked}
                         >
@@ -689,15 +554,16 @@ export function Combobox<T>({
                     return (
                       <CommandItem
                         key={valueStr}
-                        value={commandValue}
+                        value={valueStr}
+                        keywords={option.searchableValue ? [option.searchableValue] : undefined}
                         disabled={optionDisabled}
                         className={cn(
                           "min-w-0 cursor-pointer",
                           optionDisabled && "cursor-not-allowed",
                         )}
-                        onSelect={(currentValue) => {
+                        onSelect={() => {
                           if (optionDisabled) return;
-                          handleChange(actualValue(currentValue));
+                          handleChange(option, item);
                         }}
                       >
                         {startNode && <span className='mr-2 shrink-0'>{startNode}</span>}
@@ -743,5 +609,36 @@ export function Combobox<T>({
         </PopoverContent>
       </Popover>
     </Fragment>
+  );
+}
+
+/**
+ * Maps the declarative `remote` config onto the canonical remote engine:
+ * key = identifier (+ search text with searchOnInput), enabled = open (or
+ * eager on mount with disableLazyFetch), plus optional per-open revalidation.
+ */
+function useListRemoteItems<T>(
+  remote: RemoteConfig<T> | undefined,
+  searchValue: string,
+  open: boolean,
+) {
+  const searchOnInput = remote?.searchOnInput === true;
+  const minimumSearchLength = Math.max(1, remote?.minimumSearchLength ?? 1);
+  const normalizedSearchValue = searchValue.trim();
+  const canSearchRemotely = normalizedSearchValue.length >= minimumSearchLength;
+  const cacheKey = remote
+    ? searchOnInput
+      ? `${remote.identifier}:${normalizedSearchValue}`
+      : remote.identifier
+    : null;
+  const enabled =
+    Boolean(remote) &&
+    (searchOnInput ? open && canSearchRemotely : open || remote?.disableLazyFetch === true);
+  return useRemoteItems<T>(
+    remote
+      ? (signal) => remote.optionsFn(searchOnInput ? normalizedSearchValue : undefined, signal)
+      : undefined,
+    cacheKey,
+    { enabled, refreshOnOpen: remote?.refreshOnOpen === true },
   );
 }

@@ -156,9 +156,10 @@ const regions = [
 ### Remote data model
 
 - Fetches lazily when the dropdown opens (or on mount with `disableLazyFetch`).
-- Cached **per identifier** (+ search text when `searchOnInput`) — reopening is instant and network-free.
+- Cached **per identifier** (+ search text when `searchOnInput`), in a cache shared by every mounted instance — two fields using the same identifier never fetch twice.
 - `refreshOnOpen: true` revalidates on every open instead.
 - Errors clear the cache, so the next open tries again; transient failures retry twice, auth/permission (401/403) never retry.
+- Superseded requests are aborted and never write stale state or cache: changing the search text can't leak an older response into the list.
 - Concurrent searches cancel the previous request via `AbortSignal`.
 
 ## Development
