@@ -18,13 +18,16 @@
 
 One `npx shadcn add` copies the **source code** into your project, exactly like shadcn/ui does — no npm package to update, no wrappers to fight. The component is fully decoupled: **zero runtime dependencies** beyond React, all strings configurable via props, and the shadcn primitives it builds on are pulled in as registry dependencies.
 
+> [!TIP]
+> **No generics needed at the call site.** Just use `<Combobox>`. The item type `T` is inferred from the patterns you pass in — the `options` array or the return type of `remote.optionsFn` — and flows into `value`, `onChange` and `menuItemConfig` automatically.
+
 ## Features
 
 - 📋 **List combobox** — single/multi selection, clear option & inline clear button, error state, required indicator, form-ready (`id`/`name`/`aria-*`)
 - 🌳 **Tree combobox** — flat data joined by a parent key *or* already nested data; cascading parent⇄descendant checkboxes; expand/collapse all; branch-preserving search
 - 🌐 **Remote options** — lazy fetch with cancellation (`AbortSignal`), `searchOnInput` mode, min-length gate, in-memory cache per identifier, retries that skip 401/403
 - 📄 **Pagination** — client-side slices or server-driven mode
-- 🕸️ **Typed generics** — option `value` types are preserved (number, string, …), controlled & uncontrolled
+- 🕸️ **Fully inferred generics** — write `<Combobox>`, never `<Combobox<User>`; `value` types are preserved (number, string, …), controlled & uncontrolled
 - 🪶 **Light by design** — no `react-query`, no i18n lib, no HTTP client, no provider
 
 ## Install
@@ -66,14 +69,17 @@ This brings the component plus its shadcn `ui` primitives (`button`, `popover`, 
 ```tsx
 import { Combobox } from "@/components/ui/combobox";
 
-type User = { id: number; name: string; email: string };
+const users = [
+  { id: 1, name: "Ada", email: "ada@lovelace.dev" }, // T inferred from here
+  { id: 2, name: "Alan", email: "alan@turing.dev" },
+];
 
-<Combobox<User>
+<Combobox
   label="Owner"
   required
   searchInput
   value={form.ownerId}
-  onChange={(value, item) => form.setOwnerId(value)} // number | null
+  onChange={(value, item) => form.setOwnerId(value)} // value: number | null, item: (typeof users)[number]
   options={users}
   menuItemConfig={{ value: "id", label: ["name", "email"] }}
 />
@@ -84,7 +90,11 @@ type User = { id: number; name: string; email: string };
 ```tsx
 type Product = { code: string; sku: string; name: string };
 
-<Combobox<Product>
+// T inferred from the return type of searchProducts
+const searchProducts = (search?: string, signal?: AbortSignal): Promise<Product[]> =>
+  api.get("products", { params: { search }, signal });
+
+<Combobox
   label="Products"
   multiple
   fullWidth
@@ -92,7 +102,7 @@ type Product = { code: string; sku: string; name: string };
   emptyMessage="No products found"
   remote={{
     identifier: "sale-order-products",           // cache key
-    optionsFn: (search, signal) => api.search(search!, signal),
+    optionsFn: searchProducts,
     searchOnInput: true,                          // send search to the API
     minimumSearchLength: 2,
   }}
@@ -101,13 +111,19 @@ type Product = { code: string; sku: string; name: string };
 />
 ```
 
+> [!NOTE]
+> If the source can't be inferred (e.g. you pass `vi.fn()` in tests or a callback stored as `any`), annotate it: `optionsFn: ((search?: string) => Promise<Product[]>)` or keep the explicit `remote?.` config with a typed helper. You can still write `<Combobox<Product>>` when you prefer to be explicit.
+
 ### Tree
 
 ```tsx
-type Region = { code: string; name: string; parentCode?: string };
+const regions = [
+  { code: "BR", name: "Brazil", parentCode: "" },
+  { code: "SP", name: "São Paulo", parentCode: "BR" },
+];
 
 // Flat data joined by a parent key...
-<ComboboxTree<Region>
+<ComboboxTree
   label="Region"
   data={regions}
   flatParentKey="parentCode"
@@ -117,7 +133,10 @@ type Region = { code: string; name: string; parentCode?: string };
 />
 
 // ...or already nested data:
-<ComboboxTree<Region> data={nestedRegions} menuItemConfig={{ value: "code", label: ["name"] }} />
+<ComboboxTree
+  data={nestedRegions}
+  menuItemConfig={{ value: "code", label: ["name"] }}
+/>
 ```
 
 ## Props

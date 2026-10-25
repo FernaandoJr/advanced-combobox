@@ -19,7 +19,7 @@ const tables = Array.from({ length: 75 }, (_, index) => ({
 describe("Combobox pagination", () => {
   function renderTableCombobox() {
     render(
-      <Combobox<TableOption>
+      <Combobox
         label='Root table'
         options={tables}
         menuItemConfig={{
@@ -63,7 +63,7 @@ describe("Combobox pagination", () => {
     const onLoadMore = vi.fn();
 
     render(
-      <Combobox<TableOption>
+      <Combobox
         label='Root table'
         options={tables.slice(0, 2)}
         menuItemConfig={{
@@ -107,7 +107,7 @@ describe("Combobox remote search", () => {
     ]);
 
     render(
-      <Combobox<{ code: string; displayName: string }>
+      <Combobox
         label='City'
         remote={{ identifier: "context-cities", optionsFn, searchOnInput: true }}
         menuItemConfig={{ value: "code", label: ["displayName"] }}
@@ -131,7 +131,7 @@ describe("Combobox remote search", () => {
     const optionsFn = vi.fn(async () => [{ code: "city-1", displayName: "Campinas - SP" }]);
 
     render(
-      <Combobox<{ code: string; displayName: string }>
+      <Combobox
         label='City'
         remote={{ identifier: "cached-cities", optionsFn }}
         menuItemConfig={{ value: "code", label: ["displayName"] }}
@@ -157,7 +157,7 @@ describe("Combobox remote search", () => {
       .mockRejectedValueOnce({ status: 403 });
 
     render(
-      <Combobox<{ code: string; name: string }>
+      <Combobox
         label='Reference'
         remote={{ identifier: "reference", optionsFn, refreshOnOpen: true }}
         menuItemConfig={{ value: "code", label: ["name"] }}
@@ -192,7 +192,7 @@ const kinds: KindOption[] = [
 describe("Combobox selection with mixed value types", () => {
   function renderKindCombobox(value: unknown, onChange = vi.fn()) {
     render(
-      <Combobox<KindOption>
+      <Combobox
         label='Kind'
         options={kinds}
         menuItemConfig={{ value: "value", label: ["label"] }}
@@ -243,7 +243,7 @@ describe("Combobox selection with mixed value types", () => {
   test("keeps long multiple selections constrained to a full-width parent", () => {
     render(
       <div className='w-48'>
-        <Combobox<KindOption>
+        <Combobox
           fullWidth
           multiple
           value={[1, 2, 3]}
@@ -279,7 +279,7 @@ describe("Combobox inline clear button", () => {
     const onChange = vi.fn<NonNullable<ComboboxProps<PermissionOption>["onChange"]>>();
 
     render(
-      <Combobox<PermissionOption>
+      <Combobox
         label='Permission'
         options={permissions}
         menuItemConfig={{ value: "code", label: ["name"] }}

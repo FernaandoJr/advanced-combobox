@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import { ComboboxTree } from "@/components/combobox";
+import type { ComboboxTreeProps } from "@/components/combobox";
 import { userClick } from "./helpers";
 
 interface RegionRow {
@@ -18,11 +19,11 @@ const regions: RegionRow[] = [
 ];
 
 function renderRegions(
-  props: Partial<Parameters<typeof ComboboxTree<RegionRow>>[0]> = {},
+  props: Partial<ComboboxTreeProps<RegionRow>> = {},
   onChange = vi.fn(),
 ) {
   render(
-    <ComboboxTree<RegionRow>
+    <ComboboxTree
       data={regions}
       flatParentKey='parentCode'
       menuItemConfig={{ value: "code", label: ["name"] }}
@@ -101,7 +102,7 @@ describe("ComboboxTree", () => {
     ];
 
     render(
-      <ComboboxTree<{ code: string; name: string; children?: unknown[] }>
+      <ComboboxTree
         label='Region'
         data={nested}
         menuItemConfig={{ value: "code", label: ["name"] }}
