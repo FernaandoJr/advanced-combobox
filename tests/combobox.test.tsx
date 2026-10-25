@@ -117,14 +117,16 @@ describe("Combobox remote search", () => {
     );
 
     fireEvent.click(screen.getByRole("combobox", { name: "City" }));
-    expect(optionsFn).not.toHaveBeenCalled();
+
+    // Remote + searchOnInput fetches immediately on open (empty search), then per keystroke.
+    await waitFor(() => expect(optionsFn).toHaveBeenCalledWith("", expect.any(AbortSignal)));
 
     fireEvent.change(screen.getByPlaceholderText("Search city"), {
       target: { value: "MIGUELÓPOLIS" },
     });
 
     expect(await screen.findByText("MIGUELÓPOLIS - SP")).toBeTruthy();
-    expect(optionsFn).toHaveBeenCalledWith("MIGUELÓPOLIS", expect.any(AbortSignal));
+    expect(optionsFn).toHaveBeenLastCalledWith("MIGUELÓPOLIS", expect.any(AbortSignal));
   });
 
   test("caches remote options per identifier so reopening does not fetch again", async () => {
@@ -161,7 +163,7 @@ describe("Combobox remote search", () => {
         label='Reference'
         remote={{ identifier: "reference", optionsFn, refreshOnOpen: true }}
         menuItemConfig={{ value: "code", label: ["name"] }}
-        showClearOption
+        showEmptyOption
       />,
     );
     const trigger = screen.getByRole("combobox", { name: "Reference" });

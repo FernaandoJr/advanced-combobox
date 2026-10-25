@@ -77,9 +77,9 @@ export function ListCustomizePanel({
       />
       {!isMulti && (
         <PreviewSwitch
-          title='showClearOption'
-          isChecked={config.showClearOption}
-          onChange={(checked) => set("showClearOption", checked)}
+          title='showEmptyOption'
+          isChecked={config.showEmptyOption}
+          onChange={(checked) => set("showEmptyOption", checked)}
         />
       )}
       {!isMulti && (
@@ -121,15 +121,6 @@ export function ListCustomizePanel({
           onChange={(checked) => set("refreshOnOpen", checked)}
         />
       )}
-      {isRemote && (
-        <PreviewSlider
-          title='minimumSearchLength'
-          value={config.minimumSearchLength}
-          min={1}
-          max={6}
-          onChange={(value) => set("minimumSearchLength", value)}
-        />
-      )}
       <PreviewSlider
         title={isRemote ? "Latency" : "Items"}
         value={isRemote ? config.latency : config.itemCount}
@@ -154,13 +145,23 @@ export function ListCustomizePanel({
           onChange={(value) => set("pageSize", value)}
         />
       )}
-      {config.pagination !== "off" && (
-        <PreviewInput
-          title='loadMoreLabel'
-          value={config.loadMoreLabel}
-          onChange={(value) => set("loadMoreLabel", value)}
-        />
-      )}
+    </div>
+  );
+}
+
+/* Separated labels panel: 2-column grid, one frame below Customize. */
+
+export function ListLabelsPanel({
+  config,
+  set,
+}: {
+  config: ListConfig;
+  set: <K extends keyof ListConfig>(key: K, value: ListConfig[K]) => void;
+}) {
+  const isRemote = config.dataSource === "remote";
+  const isMulti = config.multiple === true;
+  return (
+    <div className='preview-options preview-options--labels'>
       <PreviewInput title='label' value={config.label} onChange={(value) => set("label", value)} />
       <PreviewInput
         title='placeholder'
@@ -193,18 +194,11 @@ export function ListCustomizePanel({
           onChange={(value) => set("remoteErrorMessage", value)}
         />
       )}
-      {isRemote && config.searchOnInput && (
+      {!isMulti && config.showEmptyOption && (
         <PreviewInput
-          title='minimumSearchMessage'
-          value={config.minimumSearchMessage}
-          onChange={(value) => set("minimumSearchMessage", value)}
-        />
-      )}
-      {!isMulti && config.showClearOption && (
-        <PreviewInput
-          title='clearOptionLabel'
-          value={config.clearOptionLabel}
-          onChange={(value) => set("clearOptionLabel", value)}
+          title='emptyOptionLabel'
+          value={config.emptyOptionLabel}
+          onChange={(value) => set("emptyOptionLabel", value)}
         />
       )}
       {!isMulti && config.showClearButton && (
@@ -212,6 +206,13 @@ export function ListCustomizePanel({
           title='clearButtonLabel'
           value={config.clearButtonLabel}
           onChange={(value) => set("clearButtonLabel", value)}
+        />
+      )}
+      {config.pagination !== "off" && (
+        <PreviewInput
+          title='loadMoreLabel'
+          value={config.loadMoreLabel}
+          onChange={(value) => set("loadMoreLabel", value)}
         />
       )}
     </div>
@@ -302,6 +303,19 @@ export function TreeCustomizePanel({
         isChecked={config.error}
         onChange={(checked) => set("error", checked)}
       />
+    </div>
+  );
+}
+
+export function TreeLabelsPanel({
+  config,
+  set,
+}: {
+  config: TreeConfig;
+  set: <K extends keyof TreeConfig>(key: K, value: TreeConfig[K]) => void;
+}) {
+  return (
+    <div className='preview-options preview-options--labels'>
       <PreviewInput title='label' value={config.label} onChange={(value) => set("label", value)} />
       <PreviewInput
         title='placeholder'
@@ -323,6 +337,13 @@ export function TreeCustomizePanel({
           title='loadingMessage'
           value={config.loadingMessage}
           onChange={(value) => set("loadingMessage", value)}
+        />
+      )}
+      {config.remote && (
+        <PreviewInput
+          title='remoteErrorMessage'
+          value={config.remoteErrorMessage}
+          onChange={(value) => set("remoteErrorMessage", value)}
         />
       )}
       <PreviewInput

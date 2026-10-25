@@ -13,7 +13,6 @@ export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve
 export const CITY_NAMES = [
   "Campinas",
   "São Paulo",
-  "Miguelópolis",
   "Curitiba",
   "Porto Alegre",
   "Belo Horizonte",
@@ -88,7 +87,6 @@ export const REGIONS_NESTED: RegionRow[] = [
 export interface CityRemoteOptions {
   identifier?: string;
   searchOnInput: boolean;
-  minimumSearchLength?: number;
   refreshOnOpen?: boolean;
   latency: number;
   /** Fails from the Nth call onwards (0 disables simulated failure). */
@@ -102,7 +100,6 @@ export function createCityRemote(options: CityRemoteOptions): RemoteConfig<City>
   return {
     identifier: options.identifier ?? "playground-cities",
     searchOnInput: options.searchOnInput,
-    minimumSearchLength: options.minimumSearchLength,
     refreshOnOpen: options.refreshOnOpen,
     disableLazyFetch: options.searchOnInput ? undefined : true,
     optionsFn: async (searchValue?: string, signal?: AbortSignal) => {

@@ -27,12 +27,12 @@ export function listConfigToCode(config: ListConfig): string {
     config.placeholder !== DEFAULT_LIST_CONFIG.placeholder,
     `  placeholder=${quote(config.placeholder)}`,
   );
-  push(config.showClearOption, "  showClearOption");
+  push(config.showEmptyOption, "  showEmptyOption");
   push(config.showClearButton, "  showClearButton");
   push(
-    config.showClearOption &&
-      config.clearOptionLabel !== DEFAULT_LIST_CONFIG.clearOptionLabel,
-    `  clearOptionLabel=${quote(config.clearOptionLabel)}`,
+    config.showEmptyOption &&
+      config.emptyOptionLabel !== DEFAULT_LIST_CONFIG.emptyOptionLabel,
+    `  emptyOptionLabel=${quote(config.emptyOptionLabel)}`,
   );
   push(
     config.searchInput &&
@@ -55,18 +55,10 @@ export function listConfigToCode(config: ListConfig): string {
       `    optionsFn,`,
     ];
     if (config.searchOnInput) {
-      remoteLines.push(
-        `    searchOnInput: true,`,
-        `    minimumSearchLength: ${config.minimumSearchLength},`,
-      );
+      remoteLines.push(`    searchOnInput: true,`);
     }
     remoteLines.push(`    refreshOnOpen: ${config.refreshOnOpen},`, `  },`);
     lines.push(...remoteLines);
-    push(
-      config.searchOnInput &&
-        config.minimumSearchMessage !== DEFAULT_LIST_CONFIG.minimumSearchMessage,
-      `  minimumSearchMessage=${quote(config.minimumSearchMessage)}`,
-    );
   }
   if (config.pagination === "client") {
     lines.push(

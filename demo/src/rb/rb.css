@@ -427,10 +427,16 @@
 }
 
 @media (max-width: 640px) {
-  .preview-options {
+  .preview-options,
+  .preview-options--labels {
     grid-template-columns: 1fr;
     padding: 11px 9px;
   }
+}
+
+/* labels panel: 2 columns instead of 3 */
+.preview-options--labels {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 /* ===== scrubber rows (PreviewSlider / PreviewSwitch / PreviewSelect / PreviewInput) ===== */
@@ -519,6 +525,9 @@
   top: 50%;
   left: 12px;
   transform: translateY(-50%);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-muted);
   font-size: 13px;
@@ -526,6 +535,15 @@
   letter-spacing: 0.01em;
   pointer-events: none;
   z-index: 4;
+}
+
+.scrubber-track--input .scrubber-input {
+  padding-left: 45%;
+}
+
+/* input rows: give shorter labels room without overlap */
+.scrubber-track--input .scrubber-label {
+  max-width: 44%;
 }
 
 .scrubber-value {

@@ -7,7 +7,7 @@ import type { RemoteConfig } from "@/components/ui/combobox/types";
 import { useTheme } from "@/components/theme-provider";
 import type { ListConfig, TreeConfig } from "@/playground/config";
 import { listConfigToCode, treeConfigToCode } from "@/playground/codegen";
-import { ListCustomizePanel, TreeCustomizePanel } from "@/playground/customize-panel";
+import { ListCustomizePanel, ListLabelsPanel, TreeCustomizePanel, TreeLabelsPanel } from "@/playground/customize-panel";
 import { applyTreePreset, listPresetUsesTickingRemote, listPresetWith } from "@/playground/presets";
 import {
   createCityRemote,
@@ -132,7 +132,6 @@ function useListSetup() {
     if (usesTicking) return createTickingRemote(config.latency, config.failAfterCalls);
     return createCityRemote({
       searchOnInput: config.searchOnInput,
-      minimumSearchLength: config.minimumSearchLength,
       refreshOnOpen: config.refreshOnOpen,
       latency: config.latency,
       failAfterCalls: config.failAfterCalls,
@@ -142,7 +141,6 @@ function useListSetup() {
     usesTicking,
     config.dataSource,
     config.searchOnInput,
-    config.minimumSearchLength,
     config.refreshOnOpen,
     config.latency,
     config.failAfterCalls,
@@ -226,8 +224,7 @@ function ListPreview({ setup }: { setup: ReturnType<typeof useListSetup> }) {
       emptyMessage={config.emptyMessage}
       loadingMessage={config.loadingMessage}
       remoteErrorMessage={config.remoteErrorMessage}
-      minimumSearchMessage={config.minimumSearchMessage}
-      clearOptionLabel={config.clearOptionLabel}
+      emptyOptionLabel={config.emptyOptionLabel}
       clearButtonLabel={config.clearButtonLabel}
       required={config.required}
       multiple={config.multiple}
@@ -235,7 +232,7 @@ function ListPreview({ setup }: { setup: ReturnType<typeof useListSetup> }) {
       disabled={config.disabled}
       error={config.error}
       searchInput={config.searchInput}
-      showClearOption={config.showClearOption && !isMulti}
+      showEmptyOption={config.showEmptyOption && !isMulti}
       showClearButton={config.showClearButton && !isMulti}
       multipleConfig={
         isMulti
@@ -455,6 +452,17 @@ export function PlaygroundPage() {
           <TreeCustomizePanel config={treeConfig} set={setTree} />
         )}
       </CustomizeFrame>
+
+      <div className='customize-frame'>
+        <div className='customize-heading'>
+          <h2>Labels</h2>
+        </div>
+        {variant === "list" ? (
+          <ListLabelsPanel config={listSetup.config} set={listSetup.set} />
+        ) : (
+          <TreeLabelsPanel config={treeConfig} set={setTree} />
+        )}
+      </div>
     </div>
   );
 }

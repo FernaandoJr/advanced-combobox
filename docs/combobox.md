@@ -33,7 +33,7 @@ import { Combobox } from "@/components/ui/combobox/combobox";
 | `selectedFallbackLabel` | `ReactNode` | `undefined` | Trigger label when the controlled value is set but its item is not loaded yet (e.g. remote hydration). |
 | `onSelectedItemResolved` | `(item: T \| null) => void` | `undefined` | Reports the complete item of a single selection after hydration, including via remote options. Fires in single-select mode only, when the item becomes available. |
 | `searchInput` | `boolean` | `false` | Shows the search input inside the dropdown. |
-| `showClearOption` | `boolean` | `false` | Shows a first option in the list that clears the selection (single mode only). |
+| `showEmptyOption` | `boolean` | `false` | Shows a first empty option in the list (single mode only); picking it empties the selection. |
 | `showClearButton` | `boolean` | `false` | Shows an inline clear button on the trigger (single mode only, hidden while disabled). |
 | `pagination` | `PaginationConfig` | `undefined` | Optional paging for large option lists, client or server driven. |
 | `label` | `string` | `undefined` | Text label rendered above the trigger, associated via `htmlFor`/`id`. |
@@ -48,9 +48,8 @@ import { Combobox } from "@/components/ui/combobox/combobox";
 | `searchPlaceholder` | `string` | `"Search..."` | Placeholder of the dropdown search input. |
 | `emptyMessage` | `string` | `"No results found"` | Message when no option matches the search. |
 | `loadingMessage` | `string` | `"Loading..."` | Message shown while loading remote data. |
-| `minimumSearchMessage` | `string` | `"Type at least N characters to search"` | Hint shown while remote `searchOnInput` is on and the search is shorter than `minimumSearchLength`. |
 | `remoteErrorMessage` | `string` | `"Could not load the options. Close and reopen this field to try again."` | Message shown when remote loading fails. |
-| `clearOptionLabel` | `string` | `"Clear"` | Label of the first clear option (`showClearOption`). |
+| `emptyOptionLabel` | `string` | `"No selection"` | Label of the first option when `showEmptyOption` is on; picking it empties the selection. |
 | `clearButtonLabel` | `string` | `"Clear selection"` | Accessible label / title of the inline clear button (`showClearButton`). |
 | `aria-describedby` | `string` | `undefined` | Forwarded to the trigger (e.g. from `FormControl`). |
 | `aria-invalid` | `boolean` | `undefined` | Forwarded to the trigger. `error` also implies it. |
@@ -73,12 +72,11 @@ import { Combobox } from "@/components/ui/combobox/combobox";
 | `optionsFn` | `(searchValue?: string, signal?: AbortSignal) => Promise<T[]>` | (required) | Returns raw items. Receives the current search text when `searchOnInput` is on, and an `AbortSignal` that cancels the request when a newer search starts. |
 | `disableLazyFetch` | `boolean` | `false` | Fetches on mount instead of on first dropdown open. Ignored while `searchOnInput` is on. |
 | `searchOnInput` | `boolean` | `false` | Sends the search text to `optionsFn` on each input instead of filtering one locally loaded page. |
-| `minimumSearchLength` | `number` | `1` | Minimum trimmed search length before a remote search is sent. |
 | `refreshOnOpen` | `boolean` | `false` | Revalidates on every fetch enable (e.g. each dropdown open) instead of trusting the cache. |
 
 Request semantics:
 
-- Fetch runs lazily when the dropdown opens (or on mount with `disableLazyFetch`).
+- Fetch runs lazily when the dropdown opens (or on mount with `disableLazyFetch`): with `searchOnInput`, the API is called right away with the current (possibly empty) search text, and again on each keystroke.
 - Cached per identifier (+ search text when `searchOnInput`) in a cache shared by every mounted instance: two fields using the same identifier never fetch twice.
 - Superseded requests are aborted and never write state or cache, so switching the search text cannot leak an older response into the list.
 - Errors clear the cache for the key, so the next open tries again. Transient failures retry up to 3 attempts; 401/403 never retry.

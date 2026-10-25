@@ -81,4 +81,4 @@ Caching, cancellation and retry semantics are the same as `<Combobox />` (see `d
 
 - `options`/`remote` list mode without hierarchy: use `<Combobox />` (see `docs/combobox.md`).
 - `pagination`: trees are loaded fully, locally filtered.
-- `showClearOption`, `showClearButton`, `searchInput`, `id`, `name`, `aria-*`: the tree always renders its own search bar and does not position itself as a plain form field. Pass `aria-invalid` through the `error` prop instead.
+- `showEmptyOption`, `showClearButton`, `searchInput`, `id`, `name`, `aria-*`: the tree always renders its own search bar and does not position itself as a plain form field. Pass `aria-invalid` through the `error` prop instead.

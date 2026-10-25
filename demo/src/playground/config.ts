@@ -18,10 +18,9 @@ export interface ListConfig {
   multiple: boolean;
   maxSelection: number | null;
   maxVisibleItems: number | null;
-  showClearOption: boolean;
+  showEmptyOption: boolean;
   showClearButton: boolean;
   searchOnInput: boolean;
-  minimumSearchLength: number;
   refreshOnOpen: boolean;
   pagination: PaginationMode;
   pageSize: number;
@@ -31,8 +30,7 @@ export interface ListConfig {
   emptyMessage: string;
   loadingMessage: string;
   remoteErrorMessage: string;
-  minimumSearchMessage: string;
-  clearOptionLabel: string;
+  emptyOptionLabel: string;
   clearButtonLabel: string;
   loadMoreLabel: string;
 }
@@ -51,10 +49,9 @@ export const DEFAULT_LIST_CONFIG: ListConfig = {
   multiple: false,
   maxSelection: null,
   maxVisibleItems: null,
-  showClearOption: false,
+  showEmptyOption: false,
   showClearButton: false,
   searchOnInput: true,
-  minimumSearchLength: 2,
   refreshOnOpen: false,
   pagination: "off",
   pageSize: 5,
@@ -64,8 +61,7 @@ export const DEFAULT_LIST_CONFIG: ListConfig = {
   emptyMessage: "No cities found",
   loadingMessage: "Loading cities...",
   remoteErrorMessage: "Could not load the cities.",
-  minimumSearchMessage: "Type at least 2 characters to search",
-  clearOptionLabel: "Clear selection",
+  emptyOptionLabel: "No selection",
   clearButtonLabel: "Clear selection",
   loadMoreLabel: "Load more",
 };

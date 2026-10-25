@@ -23,7 +23,6 @@ export const LIST_PRESETS: ListPreset[] = [
     patch: {
       dataSource: "remote",
       searchOnInput: true,
-      minimumSearchLength: 2,
       latency: 400,
     },
   },

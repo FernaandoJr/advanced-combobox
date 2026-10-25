@@ -26,8 +26,6 @@ export interface RemoteConfig<T> {
   disableLazyFetch?: boolean;
   /** When true, the current search text is sent to optionsFn instead of filtering one page locally. */
   searchOnInput?: boolean;
-  /** Minimum trimmed search length before a remote search is sent. Defaults to 1. */
-  minimumSearchLength?: number;
   /** When true, refetches every time the dropdown opens (cache is ignored). Defaults to false. */
   refreshOnOpen?: boolean;
 }
@@ -128,11 +126,11 @@ export interface ComboboxProps<T> {
   /** Text shown when no option is selected. Defaults to "Select...". */
   placeholder?: string;
   /** When true in single-select mode, shows a first option that clears the current selection. */
-  showClearOption?: boolean;
+  showEmptyOption?: boolean;
   /** When true in single-select mode, shows an inline button that clears the current selection. */
   showClearButton?: boolean;
   /** Label for the clear option. Defaults to "Clear". */
-  clearOptionLabel?: string;
+  emptyOptionLabel?: string;
   /** Accessible label / title of the inline clear button. Defaults to "Clear selection". */
   clearButtonLabel?: string;
   /** Placeholder for the dropdown search input. Defaults to "Search...". */
@@ -141,8 +139,6 @@ export interface ComboboxProps<T> {
   emptyMessage?: string;
   /** Message shown while loading remote data. Defaults to "Loading...". */
   loadingMessage?: string;
-  /** Hint shown while the search text is shorter than remote.minimumSearchLength (searchOnInput only). */
-  minimumSearchMessage?: string;
   /** Message shown when loading remote data fails. */
   remoteErrorMessage?: string;
   /** Label text for the combobox trigger (associated via htmlFor/id). */

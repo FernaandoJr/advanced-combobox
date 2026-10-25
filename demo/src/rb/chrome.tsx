@@ -353,7 +353,9 @@ export function PreviewInput({
   return (
     <div className='scrubber'>
       <div className='scrubber-track scrubber-track--input' data-disabled={isDisabled}>
-        <span className='scrubber-label'>{title}</span>
+        <span className='scrubber-label' title={title}>
+          {title}
+        </span>
         <input
           className='scrubber-input'
           type='text'
@@ -362,6 +364,7 @@ export function PreviewInput({
           placeholder={placeholder}
           disabled={isDisabled}
           aria-label={title}
+          title={value ?? undefined}
         />
       </div>
     </div>

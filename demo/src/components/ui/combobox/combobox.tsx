@@ -19,7 +19,7 @@ import type { ReactNode } from "react";
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_CLEAR_BUTTON_LABEL,
-  DEFAULT_CLEAR_OPTION_LABEL,
+  DEFAULT_EMPTY_OPTION_LABEL,
   DEFAULT_EMPTY_MESSAGE,
   DEFAULT_LOAD_MORE_LABEL,
   DEFAULT_LOADING_MESSAGE,
@@ -90,15 +90,14 @@ function FallbackLabel({ children }: { children: ReactNode }) {
 
 export function Combobox<T>({
   placeholder: placeholderProp,
-  showClearOption,
+  showEmptyOption,
   showClearButton,
-  clearOptionLabel,
+  emptyOptionLabel,
   clearButtonLabel,
   searchPlaceholder,
   emptyMessage,
   loadingMessage,
   remoteErrorMessage,
-  minimumSearchMessage,
   value: controlledValue,
   onChange,
   onSelectedItemResolved,
@@ -146,18 +145,13 @@ export function Combobox<T>({
   const itemConfig = menuItemConfig;
   const searchKeys = itemConfig.searchProperties || itemConfig.label;
   const searchText = searchPlaceholder ?? DEFAULT_SEARCH_PLACEHOLDER;
-  const clearOptionText = clearOptionLabel ?? DEFAULT_CLEAR_OPTION_LABEL;
+  const clearOptionText = emptyOptionLabel ?? DEFAULT_EMPTY_OPTION_LABEL;
   const clearButtonText = clearButtonLabel ?? DEFAULT_CLEAR_BUTTON_LABEL;
   const emptyText = isLoading
     ? (loadingMessage ?? DEFAULT_LOADING_MESSAGE)
     : remoteError
       ? (remoteErrorMessage ?? DEFAULT_REMOTE_ERROR_MESSAGE)
       : (emptyMessage ?? DEFAULT_EMPTY_MESSAGE);
-  const minimumSearchLength = Math.max(1, remote?.minimumSearchLength ?? 1);
-  const belowMinimumSearch =
-    remote?.searchOnInput === true && searchValue.trim().length < minimumSearchLength;
-  const minimumSearchText =
-    minimumSearchMessage ?? `Type at least ${minimumSearchLength} characters to search`;
 
   const valueSingle = useMemo(() => {
     if (!isControlled) return internalSingle;
@@ -438,7 +432,7 @@ export function Combobox<T>({
               aria-busy={isLoading || undefined}
               onKeyDown={onKeyDown}
               className={cn(
-                "justify-start text-left select-none h-9 min-h-9 max-h-9 min-w-0 max-w-full overflow-hidden",
+                "justify-start text-left select-none cursor-pointer h-9 min-h-9 max-h-9 min-w-0 max-w-full overflow-hidden",
                 fullWidth ? "w-full" : "min-w-70 w-max",
                 showInlineClearButton && "pr-16",
                 error && "text-destructive! border-destructive!",
@@ -522,16 +516,12 @@ export function Combobox<T>({
                     <div role='alert' className='px-3 py-4 text-sm text-muted-foreground'>
                       {remoteErrorMessage ?? DEFAULT_REMOTE_ERROR_MESSAGE}
                     </div>
-                  ) : belowMinimumSearch && optionEntries.length === 0 ? (
-                    <div role='status' className='px-3 py-4 text-sm text-muted-foreground'>
-                      {minimumSearchText}
-                    </div>
                   ) : (
                     <CommandEmpty>{emptyText}</CommandEmpty>
                   )}
-                  {!isMulti && showClearOption ? (
+                  {!isMulti && showEmptyOption ? (
                     <CommandItem
-                      value='__combobox-clear__'
+                      value='__combobox-empty__'
                       keywords={[clearOptionText]}
                       className='min-w-0 cursor-pointer'
                       onSelect={() => handleClearSelection()}
@@ -615,7 +605,7 @@ export function Combobox<T>({
                         type='button'
                         size='sm'
                         variant='ghost'
-                        className='w-full'
+                        className='w-full cursor-pointer'
                         disabled={pagination?.isLoadingMore}
                         onClick={() => {
                           if (serverPaginationEnabled) {
@@ -654,9 +644,7 @@ function useListRemoteItems<T>(
   open: boolean,
 ) {
   const searchOnInput = remote?.searchOnInput === true;
-  const minimumSearchLength = Math.max(1, remote?.minimumSearchLength ?? 1);
   const normalizedSearchValue = searchValue.trim();
-  const canSearchRemotely = normalizedSearchValue.length >= minimumSearchLength;
   const cacheKey = remote
     ? searchOnInput
       ? `${remote.identifier}:${normalizedSearchValue}`
@@ -664,9 +652,10 @@ function useListRemoteItems<T>(
     : null;
   const enabled =
     Boolean(remote) &&
-    (searchOnInput ? open && canSearchRemotely : open || remote?.disableLazyFetch === true);
+    (searchOnInput ? open : open || remote?.disableLazyFetch === true);
   return useRemoteItems<T>(
     remote
+
       ? (signal) => remote.optionsFn(searchOnInput ? normalizedSearchValue : undefined, signal)
       : undefined,
     cacheKey,
