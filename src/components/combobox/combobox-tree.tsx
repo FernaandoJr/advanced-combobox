@@ -12,6 +12,7 @@ import {
 } from "./tree-utils";
 import {
   getButtonLabelNode,
+  getButtonStartNode,
   getRawValueFromItem,
   getValueFromItem,
 } from "./utils";
@@ -46,6 +47,19 @@ import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } fr
 import { TreeContent } from "./tree-content";
 
 /** Maps the declarative tree `remote` config onto the canonical remote engine. */
+/** Trigger label layout shared by the list combobox and the tree combobox. */
+function TriggerLabel({ label, startNode }: { label: ReactNode; startNode?: ReactNode | null }) {
+  if (startNode) {
+    return (
+      <span className='flex min-w-0 items-center gap-2 py-0.5'>
+        <span className='shrink-0 flex items-center'>{startNode}</span>
+        <span className='min-w-0 truncate'>{label}</span>
+      </span>
+    );
+  }
+  return <span className='min-w-0 truncate block'>{label}</span>;
+}
+
 function useTreeRemoteItems<T>(remote: RemoteConfigTree<T> | undefined, open: boolean) {
   return useRemoteItems<T>(
     remote ? (signal) => remote.optionsFn(signal) : undefined,
@@ -255,7 +269,13 @@ export function ComboboxTree<T>({
     if (selectedItems.length === 0) return placeholder;
     if (selectedItems.length === 1) {
       const item = selectedItems[0];
-      return item ? getButtonLabelNode(item, menuItemConfig, selectedItemConfig) : placeholder;
+      if (!item) return placeholder;
+      return (
+        <TriggerLabel
+          label={getButtonLabelNode(item, menuItemConfig, selectedItemConfig)}
+          startNode={getButtonStartNode(item, menuItemConfig, selectedItemConfig)}
+        />
+      );
     }
     const maxVisible = multipleConfig?.maxVisibleItems;
     const toShow = maxVisible ? selectedItems.slice(0, maxVisible) : selectedItems;
