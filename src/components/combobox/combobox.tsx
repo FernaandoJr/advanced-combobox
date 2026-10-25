@@ -15,7 +15,7 @@ import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { Fragment, useCallback, useEffect, useId, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_CLEAR_BUTTON_LABEL,
   DEFAULT_CLEAR_OPTION_LABEL,
