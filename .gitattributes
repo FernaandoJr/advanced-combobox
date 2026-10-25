@@ -1,0 +1,4 @@
+# Registry JSONs are served as-is and rebuilt on CI (Linux); force them to LF so a
+# Windows checkout never reports a stale-registry diff on a line-ending change alone.
+public/r/*.json text eol=lf
+*.sh text eol=lf
