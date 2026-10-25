@@ -505,7 +505,9 @@ export function Combobox<T>({
               onWheel={(e) => e.stopPropagation()}
               onTouchMove={(e) => e.stopPropagation()}
             >
-              <CommandList className='max-h-none overflow-visible scroll-py-1 pr-0.5'>
+              <CommandList
+                className='max-h-none overflow-visible scroll-py-1 pr-0.5'
+              >
               {isInitialRemoteLoading ? (
                 <div
                   className='flex items-center justify-center gap-2 px-3 py-6 text-sm text-muted-foreground'
