@@ -1,5 +1,7 @@
-import { useCallback, useState } from "react";
-import { CheckIcon, CopyIcon, ExternalLinkIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { CheckIcon, CopyIcon, ExternalLinkIcon, MoonIcon, SunIcon } from "lucide-react";
+
+import { ThemeProvider, useTheme } from "@/components/theme-provider";
 
 import { Combobox } from "@/components/ui/combobox/combobox";
 import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
@@ -112,6 +114,25 @@ function DemoCard({
       <CardContent>{children}</CardContent>
       {footer && <CardFooter className='border-t bg-muted/40 rounded-b-lg py-3'>{footer}</CardFooter>}
     </Card>
+  );
+}
+
+function ThemeToggle() {
+  const { setTheme } = useTheme();
+  return (
+    <Button
+      variant='ghost'
+      size='icon'
+      title='Toggle theme'
+      onClick={() => {
+        const isDark = document.documentElement.classList.contains("dark");
+        setTheme(isDark ? "light" : "dark");
+      }}
+    >
+      <SunIcon className='hidden dark:block' />
+      <MoonIcon className='dark:hidden' />
+      <span className='sr-only'>Toggle theme</span>
+    </Button>
   );
 }
 
@@ -381,7 +402,8 @@ function States() {
 
 export default function App() {
   return (
-    <div className='bg-background text-foreground min-h-screen'>
+    <ThemeProvider defaultTheme='system'>
+      <div className='bg-background text-foreground min-h-screen'>
       <div className='border-b'>
         <div className='mx-auto flex h-14 max-w-4xl items-center justify-between px-6'>
           <a href='#top' className='flex items-center gap-2 font-medium text-sm'>
@@ -390,6 +412,7 @@ export default function App() {
           <div className='flex items-center gap-1.5'>
             <Badge variant='secondary'>shadcn registry</Badge>
             <Badge variant='outline'>MIT</Badge>
+            <ThemeToggle />
             <Button asChild variant='ghost' size='icon'>
               <a
                 href='https://github.com/FernaandoJr/advanced-combobox'
@@ -447,5 +470,6 @@ export default function App() {
         </footer>
       </main>
     </div>
+    </ThemeProvider>
   );
 }
