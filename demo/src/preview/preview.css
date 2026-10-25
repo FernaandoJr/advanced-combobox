@@ -1,31 +1,25 @@
 /*
-  React Bits design tokens and preview chrome, copied literally from the
-  android-bits repository (MIT): src/css/variables.css, category.css
-  and preview-slider.css (subset used by the Advanced Combobox playground).
-  Attribution: https://github.com/DavidHDev/react-bits
+  Demo chrome styles. Every named token derives from the default shadcn neutral
+  theme declared in index.css (single source of truth).
 */
 
 :root {
-  /* Background colors */
-  --bg-body: #120f17;
-  --bg-card: #1b1722;
-  --bg-elevated: #1b1722;
-  --bg-hover: #373044;
+  --bg-body: var(--background);
+  --bg-card: var(--card);
+  --bg-elevated: var(--popover);
+  --bg-hover: var(--accent);
 
-  /* Border colors */
-  --border-primary: #2f293a;
-  --border-secondary: #2f293a;
-  --border-subtle: #2f293a;
+  --border-primary: var(--border);
+  --border-secondary: var(--border);
+  --border-subtle: var(--border);
 
-  /* Brand colors */
-  --color-primary: #a855f7;
-  --color-accent: #b497cf;
+  --text-primary: var(--foreground);
+  --text-secondary: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-dimmed: var(--muted-foreground);
 
-  /* Text colors */
-  --text-primary: #fff;
-  --text-secondary: #f5f5f5;
-  --text-muted: #aaaaaa;
-  --text-dimmed: #a1a1aa;
+  --color-primary: var(--primary);
+  --color-accent: var(--ring);
 
   --radius-xs: 6px;
   --radius-sm: 10px;
@@ -41,75 +35,73 @@
   --transition-fast: 0.15s var(--ease-out);
   --transition-base: 0.2s var(--ease-out);
 
-  --surface-ghost: rgba(255, 255, 255, 0.07);
-  --surface-ghost-hover: rgba(255, 255, 255, 0.12);
-  --surface-ghost-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  --surface-ghost-track: rgba(255, 255, 255, 0.04);
+  /* ink-alpha surfaces follow the foreground so light/dark flip automatically */
+  --surface-ghost: color-mix(in srgb, var(--foreground) 7%, transparent);
+  --surface-ghost-hover: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --surface-ghost-highlight: inset 0 1px 0 color-mix(in srgb, var(--foreground) 7%, transparent);
+  --surface-ghost-track: color-mix(in srgb, var(--foreground) 4%, transparent);
 
-  --inset-border: rgba(255, 255, 255, 0.055);
-  --inset-divider: rgba(255, 255, 255, 0.045);
-  --row-hover: rgba(255, 255, 255, 0.022);
+  --inset-border: color-mix(in srgb, var(--foreground) 5.5%, transparent);
+  --row-hover: color-mix(in srgb, var(--foreground) 2.2%, transparent);
 
-  --slider-thumb: rgba(255, 255, 255, 0.9);
-  --slider-fill: rgba(255, 255, 255, 0.06);
-  --switch-track: #37313f;
-  --switch-track-checked: #d4d4d8;
-  --switch-knob: #a1a1aa;
-  --switch-knob-checked: #27222e;
+  --slider-thumb: var(--muted-foreground);
+  --slider-fill: color-mix(in srgb, var(--foreground) 6%, transparent);
 
-  --tool-track: rgba(255, 255, 255, 0.045);
-  --tool-track-hover: rgba(255, 255, 255, 0.08);
-  --tool-hover: rgba(255, 255, 255, 0.06);
-  --tool-raised: rgba(255, 255, 255, 0.1);
-  --tool-raised-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.35);
-  --tool-muted: rgba(244, 244, 245, 0.58);
-  --tool-tooltip: #1e1a25;
-  --tool-tooltip-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --switch-track: var(--input);
+  --switch-track-checked: var(--primary);
+  --switch-knob: var(--background);
+  --switch-knob-checked: var(--primary-foreground);
+
+  --tool-track: color-mix(in srgb, var(--foreground) 4.5%, transparent);
+  --tool-track-hover: color-mix(in srgb, var(--foreground) 8%, transparent);
+  --tool-hover: color-mix(in srgb, var(--foreground) 6%, transparent);
+  --tool-raised: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --tool-raised-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 7%, transparent),
+    0 1px 2px rgba(0, 0, 0, 0.35);
+  --tool-muted: color-mix(in srgb, var(--foreground) 58%, transparent);
+  --tool-tooltip: var(--popover);
+  --tool-tooltip-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), 0 0 0 1px color-mix(in srgb, var(--foreground) 6%, transparent);
 
   --shadow-dropdown: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --field-bg: #120f17;
-  --code-bg: #120f17;
+  --field-bg: var(--background);
+  --code-bg: var(--card);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] {
+  --syn-keyword: oklch(0.72 0.13 325);
+  --syn-string: oklch(0.82 0.12 145);
+  --syn-tag: oklch(0.76 0.09 250);
+  --syn-attr: oklch(0.83 0.1 85);
+  --syn-number: oklch(0.8 0.08 30);
+  --syn-punct: var(--muted-foreground);
 }
 
 :root[data-theme='light'] {
-  --bg-body: #ffffff;
-  --bg-card: #ffffff;
-  --bg-elevated: #f1f1f2;
-  --bg-hover: #e9e9eb;
-  --border-primary: #d1d1d4;
-  --border-secondary: #dedee1;
-  --border-subtle: #e7e7e9;
-  --color-primary: #8f36e8;
-  --color-accent: #7e3db8;
-  --text-primary: #18181b;
-  --text-secondary: #2f2f33;
-  --text-muted: #52525b;
-  --text-dimmed: #71717a;
-  --surface-ghost: rgba(24, 24, 27, 0.07);
-  --surface-ghost-hover: rgba(24, 24, 27, 0.11);
-  --surface-ghost-highlight: 0 1px 2px rgba(24, 24, 27, 0.05);
-  --surface-ghost-track: rgba(24, 24, 27, 0.055);
-  --inset-border: rgba(24, 24, 27, 0.14);
-  --inset-divider: rgba(24, 24, 27, 0.1);
-  --row-hover: rgba(24, 24, 27, 0.035);
-  --slider-thumb: #71717a;
-  --slider-fill: rgba(24, 24, 27, 0.09);
-  --switch-track: #d4d4d8;
-  --switch-track-checked: #52525b;
-  --switch-knob: #ffffff;
-  --switch-knob-checked: #ffffff;
-  --tool-track: rgba(24, 24, 27, 0.045);
-  --tool-track-hover: rgba(24, 24, 27, 0.075);
-  --tool-hover: rgba(24, 24, 27, 0.045);
-  --tool-raised: #ffffff;
-  --tool-raised-shadow: 0 1px 2px rgba(24, 24, 27, 0.08), 0 0 0 1px rgba(24, 24, 27, 0.05);
-  --tool-muted: rgba(39, 39, 42, 0.6);
-  --tool-tooltip: #ffffff;
-  --tool-tooltip-shadow: 0 8px 20px rgba(24, 24, 27, 0.12), 0 0 0 1px rgba(24, 24, 27, 0.07);
-  --shadow-dropdown: 0 16px 42px rgba(24, 24, 27, 0.12);
-  --field-bg: #ffffff;
-  --code-bg: #ffffff;
+  color-scheme: light;
 }
+
+:root[data-theme='light'] {
+  --syn-keyword: oklch(0.5 0.2 320);
+  --syn-string: oklch(0.45 0.12 150);
+  --syn-tag: oklch(0.45 0.15 255);
+  --syn-attr: oklch(0.5 0.12 75);
+  --syn-number: oklch(0.5 0.12 30);
+  --syn-punct: var(--muted-foreground);
+}
+
+/* ===== syntax highlighting tokens ===== */
+
+.syn-k { color: var(--syn-keyword); }
+.syn-s { color: var(--syn-string); }
+.syn-n { color: var(--syn-number); }
+.syn-t { color: var(--syn-tag); }
+.syn-a { color: var(--syn-attr); }
+.syn-p { color: var(--syn-punct); }
+
 
 /* ===== docs toolbar (Preview | Code + device presets) ===== */
 
@@ -286,19 +278,9 @@
 
 .preview-panel {
   position: relative;
-  --stage-border: #2f293a;
-  --stage-line: #342d40;
-  --stage-fill: #15121b;
-}
-
-:root[data-theme='light'] .preview-panel {
-  --stage-border: #ededf0;
-  --stage-line: #e4e4e7;
-  --stage-fill: #fafafa;
 }
 
 .demo-container {
-  color-scheme: dark;
   width: 100%;
   margin-top: 1em;
   background: var(--bg-body);
@@ -311,12 +293,6 @@
   color: var(--text-primary);
 }
 
-:root[data-theme='light'] .demo-container {
-  color-scheme: light;
-  background: #fff;
-  border-color: var(--border-subtle);
-  box-shadow: none;
-}
 
 /* ===== customize frame ===== */
 
@@ -329,11 +305,6 @@
   box-shadow: var(--surface-ghost-highlight);
 }
 
-:root[data-theme='light'] .customize-frame {
-  border-color: var(--border-subtle);
-  background: #fafafa;
-  box-shadow: none;
-}
 
 .customize-heading {
   display: flex;
@@ -427,16 +398,99 @@
 }
 
 @media (max-width: 640px) {
-  .preview-options,
-  .preview-options--labels {
+  .preview-options {
     grid-template-columns: 1fr;
     padding: 11px 9px;
   }
 }
 
-/* labels panel: 2 columns instead of 3 */
-.preview-options--labels {
-  grid-template-columns: repeat(2, 1fr);
+/* ===== section headers inside the customize grid ===== */
+
+.preview-section {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.preview-section:first-child {
+  margin-top: 0;
+}
+
+.preview-section::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-primary);
+  opacity: 0.6;
+}
+
+/* ===== chips rows (multi-select key pickers, same visual language) ===== */
+
+.scrubber[data-chips] {
+  min-height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-ghost-track);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 5px 8px 5px 12px;
+}
+
+.scrubber[data-chips] .scrubber-label {
+  position: static;
+  transform: none;
+  max-width: none;
+  margin-right: auto;
+  font-size: 12px;
+}
+
+.scrubber-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.scrubber-chip {
+  height: 22px;
+  padding: 0 9px;
+  border-radius: calc(var(--radius-sm) - 4px);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.scrubber-chip:hover {
+  background: var(--tool-hover);
+  color: var(--text-primary);
+}
+
+.scrubber-chip--active {
+  background: var(--switch-track-checked);
+  border-color: transparent;
+  color: var(--primary-foreground);
+  cursor: pointer;
+}
+
+.scrubber-chip--active:hover {
+  background: var(--switch-track-checked);
+  color: var(--primary-foreground);
 }
 
 /* ===== scrubber rows (PreviewSlider / PreviewSwitch / PreviewSelect / PreviewInput) ===== */
@@ -449,6 +503,8 @@
 
 .scrubber-track {
   position: relative;
+  display: flex;
+  align-items: center;
   height: 40px;
   border-radius: var(--radius-sm);
   background: var(--surface-ghost-track);
@@ -520,43 +576,35 @@
   transform: scaleX(1) scaleY(1);
 }
 
+/* flex row model: the label never shrinks and sits after nothing; the value
+   takes the remaining space and only ellipsizes when it physically cannot fit. */
+
 .scrubber-label {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  max-width: 45%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  position: relative;
+  flex: none;
+  margin-left: 12px;
   white-space: nowrap;
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.01em;
   pointer-events: none;
-  z-index: 4;
-}
-
-.scrubber-track--input .scrubber-input {
-  padding-left: 45%;
-}
-
-/* input rows: give shorter labels room without overlap */
-.scrubber-track--input .scrubber-label {
-  max-width: 44%;
 }
 
 .scrubber-value {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: auto;
+  margin-right: 12px;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   font-size: 13px;
   font-weight: 500;
   pointer-events: none;
-  z-index: 4;
 }
 
 /* ===== switch variant ===== */
@@ -579,16 +627,15 @@
 }
 
 .scrubber-switch-toggle {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  flex: none;
+  margin-left: auto;
+  margin-right: 12px;
   width: 36px;
   height: 20px;
   border-radius: 999px;
   background: var(--switch-track);
   border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
-  z-index: 4;
   transition: background var(--transition-base);
 }
 
@@ -633,19 +680,20 @@
   pointer-events: none;
   font-family: inherit;
   font-weight: 400;
-  position: static;
-  transform: none;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
 }
 
 .scrubber-select-right {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-left: auto;
+  margin-right: 12px;
   display: flex;
   align-items: center;
   gap: 6px;
-  z-index: 4;
   pointer-events: none;
 }
 
@@ -718,15 +766,7 @@
   color: var(--text-primary);
 }
 
-:root[data-theme='light'] .scrubber-dropdown {
-  background: #fff;
-  border-color: var(--border-subtle);
-  box-shadow: 0 12px 30px rgba(24, 24, 27, 0.1);
-}
 
-:root[data-theme='light'] .scrubber-dropdown-item:hover {
-  background: #f7f7f8;
-}
 
 /* ===== input variant ===== */
 
@@ -735,20 +775,17 @@
 }
 
 .scrubber-input {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
+  flex: 1;
+  min-width: 0;
   background: none;
   border: none;
   outline: none;
   color: var(--text-primary);
   font-size: 13px;
-  padding: 0 12px 0 40%;
+  padding: 0 12px 0 10px;
   text-align: right;
   text-overflow: ellipsis;
-  z-index: 4;
 }
 
 .scrubber-input::placeholder {
@@ -784,7 +821,7 @@
 
 /* ===== code panel ===== */
 
-.rb-code {
+.code-view {
   margin-top: 1em;
   background: var(--code-bg);
   border: 1px solid var(--border-primary);
@@ -792,11 +829,8 @@
   overflow: hidden;
 }
 
-:root[data-theme='light'] .rb-code {
-  border-color: var(--border-subtle);
-}
 
-.rb-code pre {
+.code-view pre {
   margin: 0;
   padding: 18px 16px;
   overflow-x: auto;

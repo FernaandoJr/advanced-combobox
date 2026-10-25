@@ -1,5 +1,13 @@
 import { DEFAULT_LIST_CONFIG, DEFAULT_TREE_CONFIG } from "./config";
 import type { ListConfig, TreeConfig } from "./config";
+import { datasetConfigDefaults } from "./datasets";
+
+/*
+  Presets: each one is a complete, intentionally different playground scenario.
+  They span every dataset, the node-style catalog, all pagination modes and the
+  remote edge cases, so each preset shows a distinct capability of the
+  component. Selecting a preset resets the whole panel to the scenario baseline.
+*/
 
 export interface ListPreset {
   name: string;
@@ -14,66 +22,87 @@ export interface ListPreset {
 export const LIST_PRESETS: ListPreset[] = [
   {
     name: "basic",
-    label: "Basic list",
+    label: "Basic (cities)",
     patch: {},
   },
   {
-    name: "remote-search",
-    label: "Remote search (searchOnInput)",
+    name: "people-directory",
+    label: "People: avatars + role badges (multi)",
     patch: {
+      dataset: "people",
+      multiple: true,
+      maxSelection: 3,
+      maxVisibleItems: 3,
+      showClearButton: true,
+      menuStartNodeStyle: "person-avatar",
+      menuLabelStyle: "person-role-badge",
+      selectedLabelStyle: "plain-badge",
+      multipleSeparator: " / ",
+    },
+  },
+  {
+    name: "plugins-catalog",
+    label: "Plugins: icons + two-line (legacy off)",
+    patch: {
+      dataset: "plugins",
+      itemCount: 24,
+      searchRule: "explicit",
+      menuStartNodeStyle: "plugin-icon",
+      menuLabelStyle: "plugin-two-line",
+      disableRule: "plugins-legacy",
+    },
+  },
+  {
+    name: "cars-paged",
+    label: "Cars: plates + client pagination",
+    patch: {
+      dataset: "cars",
+      itemCount: 40,
+      pagination: "client",
+      pageSize: 6,
+      showEmptyOption: true,
+      menuLabelStyle: "car-plate",
+      disableRule: "cars-old",
+    },
+  },
+  {
+    name: "foods-remote",
+    label: "Foods: emoji + remote search (spicy off)",
+    patch: {
+      dataset: "foods",
       dataSource: "remote",
       searchOnInput: true,
-      latency: 400,
+      latency: 450,
+      menuStartNodeStyle: "food-emoji",
+      menuLabelStyle: "food-spicy",
+      disableRule: "foods-spicy",
     },
   },
   {
-    name: "multi",
-    label: "Multiple selection",
+    name: "cities-server",
+    label: "Cities: server pagination (multi)",
     patch: {
-      dataSource: "local",
-      multiple: true,
-      maxSelection: 2,
-      maxVisibleItems: 1,
-      pagination: "off",
-    },
-  },
-  {
-    name: "pagination-client",
-    label: "Pagination (client)",
-    patch: {
-      dataSource: "local",
-      itemCount: 75,
-      pagination: "client",
-      pageSize: 10,
-      multiple: false,
-    },
-  },
-  {
-    name: "pagination-server",
-    label: "Pagination (server)",
-    patch: {
-      dataSource: "local",
-      itemCount: 23,
       pagination: "server",
       pageSize: 5,
-      latency: 350,
+      itemCount: 23,
+      multiple: true,
+      maxSelection: 4,
+      showEmptyOption: true,
     },
   },
   {
     name: "hydration",
-    label: "Persisted value hydration",
+    label: "Cities: pre-selected hydration (remote)",
     patch: {
       dataSource: "remote",
       searchOnInput: false,
       latency: 400,
-      label: "City",
-      searchInput: true,
     },
     persistedValue: "curitiba",
   },
   {
     name: "refresh-on-open",
-    label: "Refresh on open",
+    label: "Cities: refresh on open (cache bypass)",
     patch: {
       dataSource: "remote",
       searchOnInput: false,
@@ -103,12 +132,28 @@ export interface TreePreset {
 }
 
 export const TREE_PRESETS: TreePreset[] = [
-  { name: "tree-single", label: "Single (flat data)", patch: { shape: "flat" } },
-  { name: "tree-nested", label: "Single (nested data)", patch: { shape: "nested" } },
+  { name: "tree-single", label: "Single (flat)", patch: { shape: "flat" } },
+  { name: "tree-nested", label: "Single (nested)", patch: { shape: "nested" } },
   {
     name: "tree-multi",
-    label: "Multi (cascading)",
+    label: "Multi (cascading, max 3)",
     patch: { shape: "flat", multiple: true, maxSelection: 3 },
+  },
+  {
+    name: "tree-icons",
+    label: "Single (icon per kind)",
+    patch: { shape: "nested", startNodeStyle: "tree-kind-icons" },
+  },
+  {
+    name: "tree-badge-multi",
+    label: "Multi (badge trigger + separator)",
+    patch: {
+      shape: "flat",
+      multiple: true,
+      maxSelection: 5,
+      selectedLabelStyle: "plain-badge",
+      multipleSeparator: " / ",
+    },
   },
   {
     name: "tree-remote",
@@ -119,7 +164,12 @@ export const TREE_PRESETS: TreePreset[] = [
 
 export function applyListPreset(name: string): ListConfig {
   const preset = LIST_PRESETS.find((candidate) => candidate.name === name) ?? LIST_PRESETS[0];
-  return { ...DEFAULT_LIST_CONFIG, preset: preset.name, ...preset.patch };
+  const dataset = preset.patch.dataset;
+  const base =
+    dataset && dataset !== DEFAULT_LIST_CONFIG.dataset
+      ? { ...DEFAULT_LIST_CONFIG, ...datasetConfigDefaults(dataset) }
+      : DEFAULT_LIST_CONFIG;
+  return { ...base, preset: preset.name, ...preset.patch };
 }
 
 export function applyTreePreset(name: string): TreeConfig {

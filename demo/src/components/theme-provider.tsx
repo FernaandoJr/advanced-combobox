@@ -38,7 +38,7 @@ export function ThemeProvider({
       : "light";
     const resolved = theme === "system" ? systemTheme : theme;
 
-    // React Bits theme system: :root[data-theme='light'|'dark'] (copied CSS relies on it).
+    // the chrome styles rely on :root[data-theme='light'|'dark'] for the flip.
     root.setAttribute("data-theme", resolved);
     // Keep the Tailwind `dark:` variant working alongside the copied chrome.
     root.classList.toggle("dark", resolved === "dark");

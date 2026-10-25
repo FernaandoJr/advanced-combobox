@@ -2,7 +2,6 @@ import { useCallback, useRef, useState } from "react";
 
 /**
  * Pointer handling shared by the scrubber controls.
- * Copied literally from react-bits: src/hooks/useScrubGesture.js (MIT).
  */
 
 // How far a touch must travel before we decide what it meant.

@@ -3,27 +3,33 @@ import { CheckIcon, CopyIcon, MoonIcon, RotateCcw, SunIcon } from "lucide-react"
 
 import { Combobox } from "@/components/ui/combobox/combobox";
 import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
-import type { RemoteConfig } from "@/components/ui/combobox/types";
+import type {
+  MenuItemConfig,
+  RemoteConfig,
+  SelectedItemConfig,
+} from "@/components/ui/combobox/types";
 import { useTheme } from "@/components/theme-provider";
 import type { ListConfig, TreeConfig } from "@/playground/config";
 import { listConfigToCode, treeConfigToCode } from "@/playground/codegen";
-import { ListCustomizePanel, ListLabelsPanel, TreeCustomizePanel, TreeLabelsPanel } from "@/playground/customize-panel";
+import { ListCustomizePanel, TreeCustomizePanel } from "@/playground/customize-panel";
+import { getDataset, getDatasetDisableRules, datasetConfigDefaults, rowMatchesQuery } from "@/playground/datasets";
+import { getNodeStyle, renderTreeStart } from "@/playground/node-styles";
 import { applyTreePreset, listPresetUsesTickingRemote, listPresetWith } from "@/playground/presets";
 import {
-  createCityRemote,
   createTickingRemote,
   delay,
-  makeCities,
+  makeDatasetRemote,
   REGIONS_FLAT,
   REGIONS_NESTED,
+  type PlaygroundRow,
+  type RegionRow,
 } from "@/playground/fixtures";
-import { DocsToolbar } from "@/rb/chrome";
+import { CodeBlock, DocsToolbar, JsonBlock } from "@/preview";
 
 type Variant = "list" | "tree";
 type View = "preview" | "code";
-type CityRow = { code: string; displayName: string };
 
-/* ===== Customize chrome (copied literally from Customize.jsx, MIT: react-bits) ===== */
+/* ===== Customize chrome ===== */
 
 function CustomizeFrame({
   canReset,
@@ -50,36 +56,10 @@ function CustomizeFrame({
             <RotateCcw size={14} aria-hidden='true' />
             <span>Reset</span>
           </button>
-          <ThemeToggleAction />
         </div>
       </div>
       {children}
     </div>
-  );
-}
-
-function ThemeToggleAction() {
-  const { resolvedTheme, setTheme } = useTheme();
-  return (
-    <button
-      type='button'
-      className='customize-heading-action'
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-    >
-      {resolvedTheme === "dark" ? <MoonIcon size={14} /> : <SunIcon size={14} />}
-      <span>{resolvedTheme === "dark" ? "Dark" : "Light"}</span>
-    </button>
-  );
-}
-
-function StateChip({ label, text }: { label: string; text: string }) {
-  return (
-    <span className='flex items-center gap-2 rounded-md border border-(--border-primary) bg-(--surface-ghost-track) px-2.5 py-1'>
-      <span className='text-[10px] font-medium tracking-wide uppercase text-(--text-muted)'>
-        {label}
-      </span>
-      <code className='font-mono text-xs text-(--text-primary)'>{text}</code>
-    </span>
   );
 }
 
@@ -88,8 +68,8 @@ function StateChip({ label, text }: { label: string; text: string }) {
 function useListSetup() {
   const [config, setConfig] = useState<ListConfig>(() => listPresetWith("basic").config);
   const [value, setValue] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<CityRow | null>(null);
-  const [pool, setPool] = useState<CityRow[]>(() => makeCities(12));
+  const [selectedItem, setSelectedItem] = useState<PlaygroundRow | null>(null);
+  const [pool, setPool] = useState<PlaygroundRow[]>(() => getDataset("cities").make(12));
   const [serverPage, setServerPage] = useState(0);
   const [serverSearch, setServerSearch] = useState("");
   const [serverLoading, setServerLoading] = useState(false);
@@ -98,7 +78,7 @@ function useListSetup() {
     <K extends keyof ListConfig>(key: K, next: ListConfig[K]) => {
       setConfig((current) => {
         if (key === "itemCount") {
-          setPool(makeCities(next as unknown as number));
+          setPool(getDataset(current.dataset).make(next as unknown as number));
         }
         return { ...current, [key]: next };
       });
@@ -106,10 +86,23 @@ function useListSetup() {
     [],
   );
 
+  /** Swaps the fixture domain: resets label sources, custom styles and selection state. */
+  const setDataset = useCallback((key: string) => {
+    setConfig((current) => {
+      setPool(getDataset(key).make(current.itemCount));
+      return { ...current, ...datasetConfigDefaults(key) };
+    });
+    setValue(null);
+    setSelectedItem(null);
+    setServerSearch("");
+    setServerPage(0);
+    setServerLoading(false);
+  }, []);
+
   const setPreset = useCallback((presetName: string) => {
     const { config: nextConfig, persistedValue } = listPresetWith(presetName);
     setConfig(nextConfig);
-    setPool(makeCities(nextConfig.itemCount));
+    setPool(getDataset(nextConfig.dataset).make(nextConfig.itemCount));
     setValue(persistedValue);
     setSelectedItem(null);
     setServerSearch("");
@@ -127,18 +120,22 @@ function useListSetup() {
   const reset = useCallback(() => setPreset(config.preset), [config.preset, setPreset]);
 
   const usesTicking = listPresetUsesTickingRemote(config.preset);
-  const remote: RemoteConfig<CityRow> | undefined = useMemo(() => {
+  const dataset = getDataset(config.dataset);
+  const remote: RemoteConfig<PlaygroundRow> | undefined = useMemo(() => {
     if (config.dataSource !== "remote") return undefined;
     if (usesTicking) return createTickingRemote(config.latency, config.failAfterCalls);
-    return createCityRemote({
+    return makeDatasetRemote(dataset.make, {
+      identifier: `playground-${dataset.key}`,
       searchOnInput: config.searchOnInput,
       refreshOnOpen: config.refreshOnOpen,
       latency: config.latency,
       failAfterCalls: config.failAfterCalls,
       count: config.itemCount,
+      searchTextKeys: dataset.searchTextKeys,
     });
   }, [
     usesTicking,
+    dataset,
     config.dataSource,
     config.searchOnInput,
     config.refreshOnOpen,
@@ -152,9 +149,9 @@ function useListSetup() {
   const serverItems = useMemo(
     () =>
       serverQuery
-        ? pool.filter((row) => row.displayName.toLowerCase().includes(serverQuery))
+        ? pool.filter((row) => rowMatchesQuery(row, dataset.searchTextKeys, serverQuery))
         : pool.slice(0, (serverPage + 1) * config.pageSize),
-    [pool, serverPage, config.pageSize, serverQuery],
+    [pool, dataset.searchTextKeys, serverPage, config.pageSize, serverQuery],
   );
 
   const serverMachine = useMemo(
@@ -182,6 +179,7 @@ function useListSetup() {
   return {
     config,
     set,
+    setDataset,
     setPreset,
     value,
     setValue,
@@ -195,26 +193,85 @@ function useListSetup() {
   };
 }
 
-function ListPreview({ setup }: { setup: ReturnType<typeof useListSetup> }) {
+function ListPreview({
+  setup,
+  multiValue,
+  onMultiChange,
+}: {
+  setup: ReturnType<typeof useListSetup>;
+  multiValue: string[];
+  onMultiChange: (values: string[]) => void;
+}) {
   const { config } = setup;
   const isMulti = config.multiple;
-  const [multiValue, setMultiValue] = useState<string[]>([]);
+  const dataset = getDataset(config.dataset);
 
   const server = config.pagination === "server" ? setup.server.machine : undefined;
   const options = config.pagination === "server" ? setup.server.items : setup.localItems;
 
   const handleSingleChange = useCallback(
-    (value: string | string[] | null | undefined, item: unknown) => {
-      setup.setValue(typeof value === "string" ? value : null);
-      setup.setSelectedItem(Array.isArray(value) ? null : ((item as CityRow | null) ?? null));
+    (value: unknown, item: unknown) => {
+      const isList = Array.isArray(value);
+      setup.setValue(!isList && value != null ? String(value) : null);
+      setup.setSelectedItem(isList ? null : ((item as PlaygroundRow | null) ?? null));
     },
     [setup],
   );
 
-  const handleMultiChange = useCallback((next: unknown) => {
-    setMultiValue((next ?? []) as string[]);
-    setup.setSelectedItem(null);
-  }, []);
+  const handleMultiChange = useCallback(
+    (next: unknown) => {
+      onMultiChange((next ?? []) as string[]);
+      setup.setSelectedItem(null);
+    },
+    [onMultiChange, setup],
+  );
+
+  const menuLabelStyle =
+    config.menuLabelStyle === "none" ? null : getNodeStyle(config.menuLabelStyle);
+  const menuStartStyle =
+    config.menuStartNodeStyle === "none" ? null : getNodeStyle(config.menuStartNodeStyle);
+  const selectedStyle =
+    config.selectedLabelStyle === "none" ? null : getNodeStyle(config.selectedLabelStyle);
+  const selectedStartStyle =
+    config.selectedStartNodeStyle === "none" ? null : getNodeStyle(config.selectedStartNodeStyle);
+  const disableRule = getDatasetDisableRules(config.dataset).find(
+    (rule) => rule.key === config.disableRule,
+  );
+
+  const menuItemConfig: MenuItemConfig<PlaygroundRow> = {
+    value: dataset.valueKey,
+    label: config.menuLabelKeys as (keyof PlaygroundRow)[],
+    separator: config.menuSeparator,
+    disableSpaceBetween: config.disableSpaceBetween,
+    customLabel: menuLabelStyle?.renderLabel,
+    customStartNode: menuStartStyle?.renderStart,
+    searchProperties:
+      config.searchRule === "explicit"
+        ? (dataset.searchTextKeys as (keyof PlaygroundRow)[])
+        : undefined,
+    isOptionDisabled: disableRule?.predicate,
+  };
+
+  const hasSelectedOverride =
+    config.selectedLabelKeys.length > 0 ||
+    config.selectedLabelStyle !== "none" ||
+    config.selectedStartNodeStyle !== "none" ||
+    (isMulti && config.multipleSeparator !== "") ||
+    config.selectedDisableStartNode;
+
+  const selectedItemConfig: SelectedItemConfig<PlaygroundRow> | undefined = hasSelectedOverride
+    ? {
+        label:
+          config.selectedLabelKeys.length > 0
+            ? (config.selectedLabelKeys as (keyof PlaygroundRow)[])
+            : undefined,
+        customLabel: selectedStyle?.renderLabel,
+        customStartNode: selectedStartStyle?.renderStart,
+        multipleSeparator:
+          isMulti && config.multipleSeparator ? config.multipleSeparator : undefined,
+        disableStartNode: config.selectedDisableStartNode || undefined,
+      }
+    : undefined;
 
   return (
     <Combobox
@@ -260,7 +317,8 @@ function ListPreview({ setup }: { setup: ReturnType<typeof useListSetup> }) {
               }
             : undefined
       }
-      menuItemConfig={{ value: "code", label: ["displayName"] }}
+      menuItemConfig={menuItemConfig}
+      selectedItemConfig={selectedItemConfig}
     />
   );
 }
@@ -269,10 +327,14 @@ function TreePreview({
   config,
   value,
   onValueChange,
+  multiValue,
+  onMultiChange,
 }: {
   config: TreeConfig;
   value: string | null;
   onValueChange: (value: string | null) => void;
+  multiValue: string[];
+  onMultiChange: (values: string[]) => void;
 }) {
   const remote = useMemo(
     () =>
@@ -294,7 +356,6 @@ function TreePreview({
   );
 
   const isMulti = config.multiple;
-  const [multiValue, setMultiValue] = useState<string[]>([]);
 
   return (
     <ComboboxTree
@@ -318,10 +379,27 @@ function TreePreview({
       value={isMulti ? multiValue : value}
       onChange={
         isMulti
-          ? (next) => setMultiValue(((next ?? []) as unknown[]).map(String))
+          ? (next) => onMultiChange(((next ?? []) as unknown[]).map(String))
           : (next) => onValueChange(next == null ? null : String(next))
       }
-      menuItemConfig={{ value: "code", label: ["name"] }}
+      menuItemConfig={{
+        value: "code",
+        label: ["name"],
+        customStartNode:
+          config.startNodeStyle === "tree-kind-icons" ? renderTreeStart : undefined,
+      }}
+      selectedItemConfig={
+        config.selectedLabelStyle !== "none" || (isMulti && config.multipleSeparator !== "")
+          ? {
+              customLabel:
+                config.selectedLabelStyle === "none"
+                  ? undefined
+                  : getNodeStyle(config.selectedLabelStyle)?.renderLabel,
+              multipleSeparator:
+                isMulti && config.multipleSeparator ? config.multipleSeparator : undefined,
+            }
+          : undefined
+      }
     />
   );
 }
@@ -338,9 +416,11 @@ function treeIsDirty(config: TreeConfig): boolean {
 export function PlaygroundPage() {
   const [variant, setVariant] = useState<Variant>("list");
   const [view, setView] = useState<View>("preview");
+  const [multiValue, setMultiValue] = useState<string[]>([]);
   const listSetup = useListSetup();
   const [treeConfig, setTreeConfig] = useState<TreeConfig>(() => applyTreePreset("tree-single"));
   const [treeValue, setTreeValue] = useState<string | null>(null);
+  const [treeMulti, setTreeMulti] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
 
   const setTree = useCallback(
@@ -353,7 +433,30 @@ export function PlaygroundPage() {
   const setTreePreset = useCallback((presetName: string) => {
     setTreeConfig(applyTreePreset(presetName));
     setTreeValue(null);
+    setTreeMulti([]);
   }, []);
+
+  /* Selected rows behind the multi-select state, so the JSON block shows the
+     whole picture (values + resolved items) no matter which mode is active. */
+  const listSelectedItems = useMemo(() => {
+    if (variant !== "list" || !listSetup.config.multiple) return null;
+    const valueKey = getDataset(listSetup.config.dataset).valueKey;
+    const source =
+      listSetup.config.pagination === "server" ? listSetup.server.items : listSetup.localItems;
+    const ids = new Set(multiValue.map(String));
+    return source.filter((row) => ids.has(String(row[valueKey])));
+  }, [variant, listSetup.config, listSetup.server.items, listSetup.localItems, multiValue]);
+
+  const treeSelectedItems = useMemo(() => {
+    if (variant !== "tree" || !treeConfig.multiple) return null;
+    const ids = new Set(treeMulti);
+    const collect = (rows: RegionRow[]): RegionRow[] =>
+      rows.flatMap((row) => [
+        ...(ids.has(row.code) ? [row] : []),
+        ...(row.children ? collect(row.children) : []),
+      ]);
+    return collect(treeConfig.shape === "flat" ? REGIONS_FLAT : REGIONS_NESTED);
+  }, [variant, treeConfig.multiple, treeConfig.shape, treeMulti]);
 
   const activeCode = useMemo(
     () => (variant === "list" ? listConfigToCode(listSetup.config) : treeConfigToCode(treeConfig)),
@@ -380,8 +483,6 @@ export function PlaygroundPage() {
       <DocsToolbar
         activeTab={view}
         onTabChange={(next) => setView(next)}
-        previewWidth={null}
-        onPreviewWidthChange={() => undefined}
         actions={
           <button type='button' className='docs-tool' onClick={copyActive} aria-label='Copy code'>
             {copied ? <CheckIcon /> : <CopyIcon />}
@@ -412,57 +513,78 @@ export function PlaygroundPage() {
 
       {view === "preview" ? (
         <div className='preview-panel'>
-          <div className='demo-container h-[480px]'>
+          <div className='demo-container py-12 min-h-[180px]'>
             {variant === "list" ? (
-              <div className='w-full max-w-sm'>
-                <ListPreview setup={listSetup} />
-                <div className='mt-6 flex flex-wrap justify-center gap-2'>
-                  <StateChip label='value' text={listSetup.value ?? "null"} />
-                  {listSetup.selectedItem ? (
-                    <StateChip label='item' text={listSetup.selectedItem.displayName} />
-                  ) : null}
-                </div>
+              <div className='w-full max-w-[280px]'>
+                <ListPreview
+                  setup={listSetup}
+                  multiValue={multiValue}
+                  onMultiChange={setMultiValue}
+                />
               </div>
             ) : (
-              <div className='w-full max-w-sm'>
-                <TreePreview config={treeConfig} value={treeValue} onValueChange={setTreeValue} />
-                <div className='mt-6 flex flex-wrap justify-center gap-2'>
-                  <StateChip label='value' text={treeValue ?? "null"} />
-                </div>
+              <div className='w-full max-w-[280px]'>
+                <TreePreview
+                  config={treeConfig}
+                  value={treeValue}
+                  onValueChange={setTreeValue}
+                  multiValue={treeMulti}
+                  onMultiChange={setTreeMulti}
+                />
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className='rb-code'>
-          <pre>{activeCode}</pre>
+        <div className='code-view'>
+          <pre>
+            <CodeBlock code={activeCode} />
+          </pre>
         </div>
       )}
+
+      {view === "preview" ? (
+        variant === "list" ? (
+          listSetup.config.multiple ? (
+            <JsonBlock
+              data={{ value: multiValue, items: listSelectedItems ?? [] }}
+              className='mt-6'
+            />
+          ) : (
+            <JsonBlock
+              data={{ value: listSetup.value, item: listSetup.selectedItem }}
+              className='mt-6'
+            />
+          )
+        ) : treeConfig.multiple ? (
+          <JsonBlock data={{ value: treeMulti, items: treeSelectedItems ?? [] }} className='mt-6' />
+        ) : (
+          <JsonBlock data={{ value: treeValue }} className='mt-6' />
+        )
+      ) : null}
 
       <CustomizeFrame
         canReset={variant === "list" ? listSetup.isDirty() : treeIsDirty(treeConfig)}
         onReset={() => {
-          if (variant === "list") listSetup.reset();
-          else setTreePreset(treeConfig.preset);
+          if (variant === "list") {
+            listSetup.reset();
+            setMultiValue([]);
+          } else {
+            setTreePreset(treeConfig.preset);
+          }
         }}
       >
         {variant === "list" ? (
-          <ListCustomizePanel config={listSetup.config} set={listSetup.set} />
+          <ListCustomizePanel
+            config={listSetup.config}
+            set={listSetup.set}
+            setPreset={listSetup.setPreset}
+            onDatasetChange={listSetup.setDataset}
+          />
         ) : (
-          <TreeCustomizePanel config={treeConfig} set={setTree} />
+          <TreeCustomizePanel config={treeConfig} set={setTree} setPreset={setTreePreset} />
         )}
       </CustomizeFrame>
-
-      <div className='customize-frame'>
-        <div className='customize-heading'>
-          <h2>Labels</h2>
-        </div>
-        {variant === "list" ? (
-          <ListLabelsPanel config={listSetup.config} set={listSetup.set} />
-        ) : (
-          <TreeLabelsPanel config={treeConfig} set={setTree} />
-        )}
-      </div>
     </div>
   );
 }

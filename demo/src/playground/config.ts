@@ -10,6 +10,31 @@ export interface ListConfig {
   latency: number;
   /** Simulated permission failure from the Nth request onwards (0 = never). */
   failAfterCalls: number;
+  /** Which fixture domain the playground selects as `options` / `remote`. */
+  dataset: string;
+  /** Menu label parts joined by menuSeparator (overridden by menuLabelStyle). */
+  menuLabelKeys: string[];
+  /** Separator between menu label parts. */
+  menuSeparator: string;
+  disableSpaceBetween: boolean;
+  /** "label" = default (label keys); "explicit" = dataset searchTextKeys. */
+  searchRule: "label" | "explicit";
+  /** isOptionDisabled rule per dataset ("none" disables nothing). */
+  disableRule: string;
+  /** customLabel style for menu items ("none" = keys + separator). */
+  menuLabelStyle: string;
+  /** customStartNode style for menu items ("none" = nothing). */
+  menuStartNodeStyle: string;
+  /** selectedItemConfig.label override (empty = follow menu). */
+  selectedLabelKeys: string[];
+  /** selectedItemConfig.customLabel style ("none" = label keys). */
+  selectedLabelStyle: string;
+  /** selectedItemConfig.customStartNode style ("none" = menu start node). */
+  selectedStartNodeStyle: string;
+  /** Separator between multiple selected items in the trigger ("" = spacing only). */
+  multipleSeparator: string;
+  /** selectedItemConfig.disableStartNode. */
+  selectedDisableStartNode: boolean;
   searchInput: boolean;
   fullWidth: boolean;
   disabled: boolean;
@@ -41,6 +66,19 @@ export const DEFAULT_LIST_CONFIG: ListConfig = {
   itemCount: 12,
   latency: 350,
   failAfterCalls: 0,
+  dataset: "cities",
+  menuLabelKeys: ["name", "code"],
+  menuSeparator: " - ",
+  disableSpaceBetween: false,
+  searchRule: "label",
+  disableRule: "none",
+  menuLabelStyle: "none",
+  menuStartNodeStyle: "none",
+  selectedLabelKeys: [],
+  selectedLabelStyle: "none",
+  selectedStartNodeStyle: "none",
+  multipleSeparator: "",
+  selectedDisableStartNode: false,
   searchInput: true,
   fullWidth: true,
   disabled: false,
@@ -80,6 +118,12 @@ export interface TreeConfig {
   disabled: boolean;
   error: boolean;
   required: boolean;
+  /** customStartNode style ("none" = nothing). */
+  startNodeStyle: string;
+  /** selectedItemConfig customLabel style for the trigger ("none" = label). */
+  selectedLabelStyle: string;
+  /** Separator between multiple selected items in the trigger ("" = spacing only). */
+  multipleSeparator: string;
   label: string;
   placeholder: string;
   searchPlaceholder: string;
@@ -103,6 +147,9 @@ export const DEFAULT_TREE_CONFIG: TreeConfig = {
   disabled: false,
   error: false,
   required: false,
+  startNodeStyle: "none",
+  selectedLabelStyle: "none",
+  multipleSeparator: "",
   label: "Region",
   placeholder: "Select a region",
   searchPlaceholder: "Search regions",

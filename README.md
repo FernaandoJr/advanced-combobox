@@ -75,6 +75,8 @@ npm run dev
 
 The demo installs the item straight from the published registry (the same path a consumer takes) and covers: basic list, remote `searchOnInput` with real cache/abort behavior, multi-select with limits, client pagination, server pagination and both tree variants with cascading selection.
 
+> Demo UI note: parts of the demo's preview chrome (toolbar/scrubber controls) are derived from [React Bits](https://github.com/DavidHDev/react-bits) (MIT) and keep its license notice here.
+
 ## Usage
 
 ### List: local options

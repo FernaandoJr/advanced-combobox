@@ -9,6 +9,7 @@ const files = execSync("git ls-files", { encoding: "utf8" })
 
 let changed = 0;
 for (const file of files) {
+  if (!fs.existsSync(file)) continue; // renames without a git index refresh
   const buf = fs.readFileSync(file);
   const text = buf.toString("utf8");
   const normalized = text.replace(/\r\n/g, "\n").replace(/\r(?!\n)/g, "\n");

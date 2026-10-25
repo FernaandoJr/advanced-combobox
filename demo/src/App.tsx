@@ -41,19 +41,10 @@ export default function App() {
           </div>
         </div>
 
-        <div className='mx-auto max-w-4xl px-6 pb-16 pt-20'>
+        <div className='mx-auto max-w-6xl px-6 pb-16 pt-20'>
           <PlaygroundPage />
           <footer className='pt-10 pb-2 text-center text-xs text-(--text-dimmed)'>
-            Visual chrome adapted from{" "}
-            <a
-              className='underline decoration-solid underline-offset-2'
-              href='https://reactbits.dev'
-              target='_blank'
-              rel='noreferrer'
-            >
-              React Bits
-            </a>{" "}
-            (MIT). Component code installed from this repo's own shadcn registry.
+            Component code installed from this repo's own shadcn registry.
           </footer>
         </div>
       </div>

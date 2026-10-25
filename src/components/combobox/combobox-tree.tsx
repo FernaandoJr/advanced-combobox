@@ -31,7 +31,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ComboboxPopoverContent } from "./popover";
 import { cn } from "@/lib/utils";
 import {
@@ -340,27 +340,29 @@ export function ComboboxTree<T>({
                 </InputGroupAddon>
                 <InputGroupAddon align='inline-end' className='h-9 w-9 shrink-0'>
                   {allFolderValues.length > 0 && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type='button'
-                          variant='link'
-                          size='icon'
-                          className=' text-muted-foreground'
-                          onClick={toggleExpandCollapse}
-                          aria-label={isAllExpanded ? collapseAllLabel : expandAllLabel}
-                        >
-                          {isAllExpanded ? (
-                            <ListChevronsDownUp className='h-4 w-4' />
-                          ) : (
-                            <ListChevronsUpDown className='h-4 w-4' />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {isAllExpanded ? collapseAllLabel : expandAllLabel}
-                      </TooltipContent>
-                    </Tooltip>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type='button'
+                            variant='link'
+                            size='icon'
+                            className=' text-muted-foreground'
+                            onClick={toggleExpandCollapse}
+                            aria-label={isAllExpanded ? collapseAllLabel : expandAllLabel}
+                          >
+                            {isAllExpanded ? (
+                              <ListChevronsDownUp className='h-4 w-4' />
+                            ) : (
+                              <ListChevronsUpDown className='h-4 w-4' />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isAllExpanded ? collapseAllLabel : expandAllLabel}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </InputGroupAddon>
               </InputGroup>

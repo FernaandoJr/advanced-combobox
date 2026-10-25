@@ -1,25 +1,48 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Eye, SquareCode, Monitor, Tablet, Smartphone, Maximize } from "lucide-react";
+import { Eye, SquareCode, Maximize } from "lucide-react";
 
 import useScrubGesture from "./useScrubGesture";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-/* React Bits preview controls, copied literally (MIT):
-   src/components/common/Preview/{PreviewSlider,PreviewSwitch,PreviewSelect,PreviewInput}.jsx
-   Types are the only addition. */
+/* Preview controls: slider / switch / select / input rows used by the playground. */
 
 const clamp = (val: number, min: number, max: number) => Math.min(Math.max(val, min), max);
 const stepDecimals = (step: number) => {
   const s = step.toString();
-  const dot = s.indexOf(".");
-  return dot === -1 ? 0 : s.length - dot - 1;
+  const i = s.indexOf(".");
+  return i === -1 ? 0 : s.length - i - 1;
 };
 const roundToStep = (val: number, step: number, min: number) => {
   const raw = Math.round((val - min) / step) * step + min;
   const decimals = Math.max(stepDecimals(step), stepDecimals(min));
   return Number(raw.toFixed(decimals));
 };
+
+/* ===== whole-row hint: shadcn tooltip opens on hover anywhere in the row ===== */
+
+export function WithHint({
+  hint,
+  children,
+}: {
+  hint?: string;
+  children: ReactNode;
+}) {
+  if (!hint) return <>{children}</>;
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        {/* asChild: the row element itself is the trigger — no wrapper div, so
+            the customize grid's `> :not(.scrubber)` spanning rule stays calm. */}
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent side='top' className='max-w-[27.5rem] w-max text-pretty'>
+          {hint}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 export function PreviewSlider({
   title = "",
@@ -30,6 +53,7 @@ export function PreviewSlider({
   valueUnit = "",
   isDisabled = false,
   displayValue,
+  hint,
   onChange,
 }: {
   title?: string;
@@ -40,6 +64,7 @@ export function PreviewSlider({
   valueUnit?: string;
   isDisabled?: boolean;
   displayValue?: (value: number) => string;
+  hint?: string;
   onChange?: (value: number) => void;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -114,7 +139,8 @@ export function PreviewSlider({
     : `${Number(value.toFixed(decimals))}${valueUnit}`;
 
   return (
-    <div className='scrubber'>
+    <WithHint hint={hint}>
+      <div className='scrubber'>
       <div
         className='scrubber-track'
         ref={trackRef}
@@ -153,6 +179,7 @@ export function PreviewSlider({
         <div className='scrubber-value'>{formattedValue}</div>
       </div>
     </div>
+    </WithHint>
   );
 }
 
@@ -161,18 +188,21 @@ export function PreviewSwitch({
   isChecked = false,
   onChange,
   isDisabled = false,
+  hint,
 }: {
   title?: string;
   isChecked?: boolean;
   onChange?: (checked: boolean) => void;
   isDisabled?: boolean;
+  hint?: string;
 }) {
   const handleChange = () => {
     if (!isDisabled) onChange?.(!isChecked);
   };
 
   return (
-    <div className='scrubber'>
+    <WithHint hint={hint}>
+      <div className='scrubber'>
       <button
         type='button'
         className='scrubber-track scrubber-track--switch'
@@ -197,6 +227,7 @@ export function PreviewSwitch({
         </span>
       </button>
     </div>
+    </WithHint>
   );
 }
 
@@ -208,12 +239,14 @@ export function PreviewSelect({
   options = [],
   value = "",
   isDisabled = false,
+  hint,
   onChange,
 }: {
   title?: string;
   options?: { value: string; label: string }[];
   value?: string;
   isDisabled?: boolean;
+  hint?: string;
   onChange?: (value: string) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -269,6 +302,7 @@ export function PreviewSelect({
   }, [open]);
 
   return (
+    <WithHint hint={hint}>
     <div className='scrubber' ref={wrapRef} style={{ position: "relative" }}>
       <button
         type='button'
@@ -332,6 +366,7 @@ export function PreviewSelect({
           document.body,
         )}
     </div>
+    </WithHint>
   );
 }
 
@@ -340,18 +375,21 @@ export function PreviewInput({
   value = "",
   placeholder = "",
   isDisabled = false,
+  hint,
   onChange,
 }: {
   title?: string;
   value?: string;
   placeholder?: string;
   isDisabled?: boolean;
+  hint?: string;
   onChange?: (value: string) => void;
 }) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value);
 
   return (
-    <div className='scrubber'>
+    <WithHint hint={hint}>
+      <div className='scrubber'>
       <div className='scrubber-track scrubber-track--input' data-disabled={isDisabled}>
         <span className='scrubber-label' title={title}>
           {title}
@@ -368,6 +406,7 @@ export function PreviewInput({
         />
       </div>
     </div>
+    </WithHint>
   );
 }
 
@@ -422,22 +461,16 @@ function Pill({ pill }: { pill: ReturnType<typeof usePill> }) {
 export function DocsToolbar({
   activeTab,
   onTabChange,
-  previewWidth,
-  onPreviewWidthChange,
   actions,
   variantTabs,
 }: {
   activeTab: "preview" | "code";
   onTabChange: (tab: "preview" | "code") => void;
-  previewWidth: number | null;
-  onPreviewWidthChange: (width: number | null) => void;
   actions?: ReactNode;
   variantTabs?: ReactNode;
 }) {
   const tabsTrackRef = useRef<HTMLDivElement>(null);
-  const sizeTrackRef = useRef<HTMLDivElement>(null);
   const tabsPill = usePill(tabsTrackRef, activeTab);
-  const sizePill = usePill(sizeTrackRef, `${previewWidth}`);
 
   const canFullscreen =
     typeof document !== "undefined" &&
@@ -483,38 +516,6 @@ export function DocsToolbar({
       {variantTabs}
 
       <div className='docs-toolbar-actions'>
-        <div
-          className='docs-track'
-          role='group'
-          aria-label='Preview size'
-          ref={sizeTrackRef}
-          data-pill=''
-        >
-          <Pill pill={sizePill} />
-          {(
-            [
-              { label: "Desktop", width: null, Icon: MonitorIcon },
-              { label: "Tablet · 768px", width: 768, Icon: TabletIcon },
-              { label: "Mobile · 375px", width: 375, Icon: PhoneIcon },
-            ] as const
-          ).map(
-            (preset) =>
-              (preset.width === null || (preset.width ?? 0) < 1200) && (
-                <button
-                  key={preset.label}
-                  type='button'
-                  className='docs-segment docs-segment--icon'
-                  aria-label={preset.label}
-                  aria-pressed={previewWidth === preset.width}
-                  title={preset.label}
-                  onClick={() => onPreviewWidthChange(preset.width)}
-                >
-                  <preset.Icon />
-                </button>
-              ),
-          )}
-        </div>
-
         <div className='docs-track' role='group' aria-label='Page actions'>
           {actions}
           {canFullscreen && (
@@ -537,7 +538,4 @@ export function DocsToolbar({
 /* Lucide icons standing in for @hugeicons/react (same 16px stroke role). */
 const EyeIcon = () => <Eye />;
 const CodeIcon = () => <SquareCode />;
-const MonitorIcon = () => <Monitor />;
-const TabletIcon = () => <Tablet />;
-const PhoneIcon = () => <Smartphone />;
 const MaximizeIcon = () => <Maximize />;
