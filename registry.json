@@ -1,0 +1,37 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "advanced-combobox",
+  "homepage": "https://github.com/FernaandoJr/advanced-combobox",
+  "items": [
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Advanced Combobox",
+      "description": "Advanced list & tree combobox: remote search, pagination, multi-select, labels as props.",
+      "keywords": ["combobox", "select", "autocomplete", "tree", "multi-select", "remote"],
+      "dependencies": ["cmdk", "lucide-react"],
+      "registryDependencies": [
+        "button",
+        "checkbox",
+        "collapsible",
+        "command",
+        "input-group",
+        "label",
+        "popover",
+        "scroll-area",
+        "tooltip"
+      ],
+      "files": [
+        { "path": "src/components/combobox/combobox.tsx", "type": "registry:ui", "target": "@ui/combobox.tsx" },
+        { "path": "src/components/combobox/combobox-types.ts", "type": "registry:ui", "target": "@ui/combobox-types.ts" },
+        { "path": "src/components/combobox/combobox-utils.ts", "type": "registry:ui", "target": "@ui/combobox-utils.ts" },
+        { "path": "src/components/combobox/combobox-remote-errors.ts", "type": "registry:ui", "target": "@ui/combobox-remote-errors.ts" },
+        { "path": "src/components/combobox/combobox-tree.tsx", "type": "registry:ui", "target": "@ui/combobox-tree.tsx" },
+        { "path": "src/components/combobox/combobox-tree-utils.ts", "type": "registry:ui", "target": "@ui/combobox-tree-utils.ts" },
+        { "path": "src/components/combobox/tree-content.tsx", "type": "registry:ui", "target": "@ui/tree-content.tsx" },
+        { "path": "src/components/combobox/index.ts", "type": "registry:ui", "target": "@ui/combobox/index.ts" }
+      ]
+    }
+  ]
+}
