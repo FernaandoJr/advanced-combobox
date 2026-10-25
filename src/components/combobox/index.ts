@@ -13,14 +13,14 @@ export type {
   PaginationConfig,
   RemoteConfig,
   SelectedItemConfig,
-} from "./combobox-types";
+} from "./types";
 export type {
   ComboboxTreeProps,
   RemoteConfigTree,
-} from "./combobox-types";
+} from "./types";
 export type {
   BuildLabelOptions,
-} from "./combobox-utils";
+} from "./utils";
 export {
   buildLabelFromKeys,
   buildSearchableValue,
@@ -30,4 +30,5 @@ export {
   getRawValueFromItem,
   getValueFromItem,
   isSameComboboxValue,
-} from "./combobox-utils";
+} from "./utils";
+

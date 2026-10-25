@@ -5,7 +5,7 @@ Tree dropdown with collapsible folders, cascading checkbox selection in multi-se
 - Quick start (flat data):
 
 ```tsx
-import { ComboboxTree } from "@/components/ui/combobox";
+import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
 
 const rows = [
   { code: "BR", name: "Brazil", parentCode: "" },

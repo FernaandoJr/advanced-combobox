@@ -5,7 +5,7 @@ Autocomplete dropdown with single or multiple selection, remote options, paginat
 - Quick start:
 
 ```tsx
-import { Combobox } from "@/components/ui/combobox";
+import { Combobox } from "@/components/ui/combobox/combobox";
 
 <Combobox
   label="Owner"

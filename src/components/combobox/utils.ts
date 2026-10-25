@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { MenuItemConfig, SelectedItemConfig } from "./combobox-types";
+import type { MenuItemConfig, SelectedItemConfig } from "./types";
 
 export interface BuildLabelOptions {
   separator?: string;
@@ -211,3 +211,4 @@ export function getLabelNode<T>(item: T, itemConfig: MenuItemConfig<T>): ReactNo
     disableSpaceBetween: itemConfig.disableSpaceBetween,
   });
 }
+

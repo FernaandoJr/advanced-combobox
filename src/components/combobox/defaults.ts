@@ -10,3 +10,4 @@ export const DEFAULT_CLEAR_BUTTON_LABEL = "Clear selection";
 export const DEFAULT_LOAD_MORE_LABEL = "Load more";
 export const DEFAULT_EXPAND_ALL_LABEL = "Expand all";
 export const DEFAULT_COLLAPSE_ALL_LABEL = "Collapse all";
+

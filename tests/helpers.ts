@@ -8,3 +8,4 @@ export async function userClick(element: Element) {
   const user = userEvent.setup({ pointerEventsCheck: 0 });
   await user.click(element);
 }
+

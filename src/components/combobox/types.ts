@@ -237,3 +237,4 @@ export interface ComboboxTreeProps<T> {
   onBlur?: () => void;
   onMaxSelectionReached?: () => void;
 }
+

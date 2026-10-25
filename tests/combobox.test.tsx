@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import { Combobox } from "@/components/combobox";
-import type { ComboboxProps } from "@/components/combobox/combobox-types";
+import type { ComboboxProps } from "@/components/combobox/types";
 
 interface TableOption {
   qualifiedName: string;
@@ -323,3 +323,4 @@ describe("Combobox inline clear button", () => {
     expect(screen.queryByRole("button", { name: "Clear selection" })).toBeNull();
   });
 });
+

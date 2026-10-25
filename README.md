@@ -67,7 +67,7 @@ This brings the component plus its shadcn `ui` primitives (`button`, `popover`, 
 ### List: local options
 
 ```tsx
-import { Combobox } from "@/components/ui/combobox";
+import { Combobox } from "@/components/ui/combobox/combobox";
 
 const users = [
   { id: 1, name: "Ada", email: "ada@lovelace.dev" }, // T inferred from here
@@ -117,6 +117,8 @@ const searchProducts = (search?: string, signal?: AbortSignal): Promise<Product[
 ### Tree
 
 ```tsx
+import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
+
 const regions = [
   { code: "BR", name: "Brazil", parentCode: "" },
   { code: "SP", name: "São Paulo", parentCode: "BR" },

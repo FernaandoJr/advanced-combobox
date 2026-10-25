@@ -10,7 +10,7 @@
       "title": "Advanced Combobox",
       "description": "Advanced list & tree combobox: remote search, pagination, multi-select, labels as props.",
       "keywords": ["combobox", "select", "autocomplete", "tree", "multi-select", "remote"],
-      "dependencies": ["cmdk", "lucide-react"],
+      "dependencies": ["@radix-ui/react-popover", "cmdk", "lucide-react"],
       "registryDependencies": [
         "button",
         "checkbox",
@@ -24,15 +24,17 @@
       ],
       "files": [
         { "path": "src/components/combobox/combobox.tsx", "type": "registry:ui", "target": "@ui/combobox/combobox.tsx" },
-        { "path": "src/components/combobox/combobox-types.ts", "type": "registry:ui", "target": "@ui/combobox/combobox-types.ts" },
-        { "path": "src/components/combobox/combobox-utils.ts", "type": "registry:ui", "target": "@ui/combobox/combobox-utils.ts" },
-        { "path": "src/components/combobox/combobox-defaults.ts", "type": "registry:ui", "target": "@ui/combobox/combobox-defaults.ts" },
-        { "path": "src/components/combobox/combobox-remote.ts", "type": "registry:ui", "target": "@ui/combobox/combobox-remote.ts" },
+        { "path": "src/components/combobox/popover.tsx", "type": "registry:ui", "target": "@ui/combobox/popover.tsx" },
+        { "path": "src/components/combobox/types.ts", "type": "registry:ui", "target": "@ui/combobox/types.ts" },
+        { "path": "src/components/combobox/utils.ts", "type": "registry:ui", "target": "@ui/combobox/utils.ts" },
+        { "path": "src/components/combobox/defaults.ts", "type": "registry:ui", "target": "@ui/combobox/defaults.ts" },
+        { "path": "src/components/combobox/remote.ts", "type": "registry:ui", "target": "@ui/combobox/remote.ts" },
         { "path": "src/components/combobox/combobox-tree.tsx", "type": "registry:ui", "target": "@ui/combobox/combobox-tree.tsx" },
-        { "path": "src/components/combobox/combobox-tree-utils.ts", "type": "registry:ui", "target": "@ui/combobox/combobox-tree-utils.ts" },
-        { "path": "src/components/combobox/tree-content.tsx", "type": "registry:ui", "target": "@ui/combobox/tree-content.tsx" },
-        { "path": "src/components/combobox/index.ts", "type": "registry:ui", "target": "@ui/combobox/index.ts" }
+        { "path": "src/components/combobox/tree-utils.ts", "type": "registry:ui", "target": "@ui/combobox/tree-utils.ts" },
+        { "path": "src/components/combobox/tree-content.tsx", "type": "registry:ui", "target": "@ui/combobox/tree-content.tsx" }
       ]
     }
   ]
 }
+
+
