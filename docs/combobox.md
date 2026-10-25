@@ -48,6 +48,7 @@ import { Combobox } from "@/components/ui/combobox/combobox";
 | `searchPlaceholder` | `string` | `"Search..."` | Placeholder of the dropdown search input. |
 | `emptyMessage` | `string` | `"No results found"` | Message when no option matches the search. |
 | `loadingMessage` | `string` | `"Loading..."` | Message shown while loading remote data. |
+| `minimumSearchMessage` | `string` | `"Type at least N characters to search"` | Hint shown while remote `searchOnInput` is on and the search is shorter than `minimumSearchLength`. |
 | `remoteErrorMessage` | `string` | `"Could not load the options. Close and reopen this field to try again."` | Message shown when remote loading fails. |
 | `clearOptionLabel` | `string` | `"Clear"` | Label of the first clear option (`showClearOption`). |
 | `clearButtonLabel` | `string` | `"Clear selection"` | Accessible label / title of the inline clear button (`showClearButton`). |
