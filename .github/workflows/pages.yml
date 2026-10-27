@@ -26,8 +26,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            demo/package-lock.json
       - run: npm ci
       - run: npm run registry:build
+      - run: npm --prefix demo ci
+      - run: npm run build --prefix demo
+      - run: mkdir -p public/demo && cp -r demo/dist/* public/demo/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public
