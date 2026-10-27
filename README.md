@@ -10,9 +10,7 @@
 
 ⭐ If you like this project, star it on GitHub!
 
-[Features](#features) • [Install](#install) • [Usage](#usage) • [API Reference](#api-reference) • [Development](#development)
-
-**[🎮 Live demo — playground](https://fernaandojr.github.io/advanced-combobox/demo/)** · [`r/combobox.json` (registry URL)](https://fernaandojr.github.io/advanced-combobox/r/combobox.json)
+[Features](#features) • [Install](#install) • [Usage](#usage) • [API Reference](#api-reference) • [Development](#development) • [Demo](https://fernaandojr.github.io/advanced-combobox/demo/)
 
 </div>
 
