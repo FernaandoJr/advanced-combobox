@@ -1,9 +1,6 @@
 export {
   Combobox,
 } from "./combobox";
-export {
-  ComboboxTree,
-} from "./combobox-tree";
 export type {
   ComboboxProps,
   ComboboxOption,
@@ -15,10 +12,6 @@ export type {
   SelectedItemConfig,
 } from "./types";
 export type {
-  ComboboxTreeProps,
-  RemoteConfigTree,
-} from "./types";
-export type {
   BuildLabelOptions,
 } from "./utils";
 export {
@@ -27,8 +20,8 @@ export {
   getItemByValue,
   getItemsByValues,
   getLabelNode,
+  getMultiSelectionPlainText,
   getRawValueFromItem,
   getValueFromItem,
   isSameComboboxValue,
 } from "./utils";
-

@@ -152,11 +152,6 @@ const results = useApi(`/products?search=${query}&page=${page}`);
 />
 ```
 
-## Not available on `<Combobox />`
-
-- Tree rendering and cascading selection: use `<ComboboxTree />` (see `docs/combobox-tree.md`).
-- Built-in trigger search field styling beyond `searchInput` (the tree variant always renders its own search bar).
-
 ## Form integration note
 
 The trigger accepts `id`, `name` and `aria-*` like a shadcn form control, and value lives outside the DOM: the component is a controlled/uncontrolled input pair, the same contract as `react-hook-form` consuming `onChange` with `null` on clear.

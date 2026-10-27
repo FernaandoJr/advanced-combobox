@@ -6,7 +6,6 @@ import fs from "node:fs";
 const itemPath = "public/r/combobox.json";
 const docsFiles = [
   "docs/combobox.md",
-  "docs/combobox-tree.md",
 ];
 
 const item = JSON.parse(fs.readFileSync(itemPath, "utf8"));

@@ -142,6 +142,28 @@ function getPlainTextFromNode(node: ReactNode): string | undefined {
 }
 
 /**
+ * Builds the multi-selection trigger label as one plain string joined by
+ * `separator`. Returns null when any item resolves to a ReactNode (customLabel),
+ * so the caller can fall back to the node-based flex layout.
+ */
+export function getMultiSelectionPlainText<T>(
+  items: T[],
+  menuConfig: MenuItemConfig<T>,
+  selectedConfig?: SelectedItemConfig<T>,
+  separator = ", ",
+): string | null {
+  if (items.length === 0) return null;
+  let label = "";
+  for (let index = 0; index < items.length; index++) {
+    const part = getButtonLabelPlainText(items[index], menuConfig, selectedConfig);
+    if (part === undefined) return null;
+    if (index > 0) label += separator;
+    label += part;
+  }
+  return label;
+}
+
+/**
  * Obtém o texto puro do label para uso em `title` no botão (tooltip nativo).
  * Mesma prioridade do getButtonLabelNode.
  */

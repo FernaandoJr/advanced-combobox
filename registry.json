@@ -8,19 +8,16 @@
       "name": "combobox",
       "type": "registry:ui",
       "title": "Advanced Combobox",
-      "description": "Advanced list & tree combobox: remote search, pagination, multi-select, labels as props.",
-      "keywords": ["combobox", "select", "autocomplete", "tree", "multi-select", "remote"],
+      "description": "Advanced list combobox: remote search, pagination, multi-select, labels as props.",
+      "keywords": ["combobox", "select", "autocomplete", "multi-select", "remote"],
       "dependencies": ["@radix-ui/react-popover", "cmdk", "lucide-react"],
       "registryDependencies": [
         "button",
         "checkbox",
-        "collapsible",
         "command",
-        "input-group",
         "label",
         "popover",
-        "scroll-area",
-        "tooltip"
+        "scroll-area"
       ],
       "files": [
         { "path": "src/components/combobox/combobox.tsx", "type": "registry:ui", "target": "@ui/combobox/combobox.tsx" },
@@ -29,9 +26,7 @@
         { "path": "src/components/combobox/utils.ts", "type": "registry:ui", "target": "@ui/combobox/utils.ts" },
         { "path": "src/components/combobox/defaults.ts", "type": "registry:ui", "target": "@ui/combobox/defaults.ts" },
         { "path": "src/components/combobox/remote.ts", "type": "registry:ui", "target": "@ui/combobox/remote.ts" },
-        { "path": "src/components/combobox/combobox-tree.tsx", "type": "registry:ui", "target": "@ui/combobox/combobox-tree.tsx" },
-        { "path": "src/components/combobox/tree-utils.ts", "type": "registry:ui", "target": "@ui/combobox/tree-utils.ts" },
-        { "path": "src/components/combobox/tree-content.tsx", "type": "registry:ui", "target": "@ui/combobox/tree-content.tsx" }
+        { "path": "docs/combobox.md", "type": "registry:file", "target": "@ui/combobox/combobox.md" }
       ]
     }
   ]

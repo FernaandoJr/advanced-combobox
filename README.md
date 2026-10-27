@@ -1,7 +1,7 @@
 <div align="center">
 
 # Advanced Combobox
-*A list & tree combobox for the shadcn registry. Simple, light, performatic, reusable.*
+*A combobox for the shadcn registry. Simple, light, performatic, reusable.*
 
 [![CI](https://img.shields.io/github/actions/workflow/status/FernaandoJr/advanced-combobox/ci.yml?branch=main&style=flat-square)](https://github.com/FernaandoJr/advanced-combobox/actions)
 [![shadcn registry](https://img.shields.io/badge/shadcn-registry-blue?style=flat-square)](#install)
@@ -24,7 +24,6 @@ One `npx shadcn add` copies the **source code** into your project, exactly like 
 ## Features
 
 - 📋 **List combobox**: single/multi selection, clear option & inline clear button, error state, required indicator, form-ready (`id`/`name`/`aria-*`)
-- 🌳 **Tree combobox**: flat data joined by a parent key *or* already nested data; cascading parent⇄descendant checkboxes; expand/collapse all; branch-preserving search
 - 🌐 **Remote options**: lazy fetch with cancellation (`AbortSignal`), `searchOnInput` mode, min-length gate, in-memory cache per identifier, retries that skip 401/403
 - 📄 **Pagination**: client-side slices or server-driven mode
 - 🕸️ **Fully inferred generics**: write `<Combobox>`, never `<Combobox<User>`; `value` types are preserved (number, string, …), controlled & uncontrolled
@@ -57,7 +56,7 @@ Or by raw URL, no configuration needed:
 npx shadcn add https://fernaandojr.github.io/advanced-combobox/r/combobox.json
 ```
 
-This brings the component plus its shadcn `ui` primitives (`button`, `popover`, `command`, `checkbox`, `label`, `collapsible`, `input-group`, `scroll-area`, `tooltip`) and deps (`cmdk`, `lucide-react`) into **your** codebase. Edit anything afterwards.
+This brings the component plus its shadcn `ui` primitives (`button`, `popover`, `command`, `checkbox`, `label`, `scroll-area`) and deps (`cmdk`, `lucide-react`) into **your** codebase. Edit anything afterwards.
 
 > [!NOTE]
 > Requirements: React 18/19, Tailwind CSS (v4 recommended), a shadcn-style project with `cn` exported from `@/lib/utils`.
@@ -73,7 +72,7 @@ npx shadcn add https://fernaandojr.github.io/advanced-combobox/r/combobox.json -
 npm run dev
 ```
 
-The demo installs the item straight from the published registry (the same path a consumer takes) and covers: basic list, remote `searchOnInput` with real cache/abort behavior, multi-select with limits, client pagination, server pagination and both tree variants with cascading selection.
+The demo installs the item straight from the published registry (the same path a consumer takes) and covers: basic list, remote `searchOnInput` with real cache/abort behavior, multi-select with limits, and client/server pagination.
 
 > Demo UI note: parts of the demo's preview chrome (toolbar/scrubber controls) are derived from [React Bits](https://github.com/DavidHDev/react-bits) (MIT) and keep its license notice here.
 
@@ -129,39 +128,11 @@ const searchProducts = (search?: string, signal?: AbortSignal): Promise<Product[
 > [!NOTE]
 > If the source can't be inferred (e.g. you pass `vi.fn()` in tests or a callback stored as `any`), annotate it: `optionsFn: ((search?: string) => Promise<Product[]>)` or keep the explicit `remote?.` config with a typed helper. You can still write `<Combobox<Product>>` when you prefer to be explicit.
 
-### Tree
-
-```tsx
-import { ComboboxTree } from "@/components/ui/combobox/combobox-tree";
-
-const regions = [
-  { code: "BR", name: "Brazil", parentCode: "" },
-  { code: "SP", name: "São Paulo", parentCode: "BR" },
-];
-
-// Flat data joined by a parent key...
-<ComboboxTree
-  label="Region"
-  data={regions}
-  flatParentKey="parentCode"
-  rootParentValues={["-1"]} // extra parent values treated as root
-  multiple
-  menuItemConfig={{ value: "code", label: ["name"] }}
-/>
-
-// ...or already nested data:
-<ComboboxTree
-  data={nestedRegions}
-  menuItemConfig={{ value: "code", label: ["name"] }}
-/>
-```
-
 ## API Reference
 
-Every prop of both variants is fully documented with type, default and semantics:
+Every prop is fully documented with type, default and semantics:
 
 - [`docs/combobox.md`](docs/combobox.md): `<Combobox />` and the `remote`, `menuItemConfig`, `pagination`, `multipleConfig` and `selectedItemConfig` configs, plus callbacks and remote request semantics (caching, cancellation, retries).
-- [`docs/combobox-tree.md`](docs/combobox-tree.md): `<ComboboxTree />` with flat/nested data joining, cascading selection and search behavior.
 
 The same reference ships inside the registry item (`docs` field), so `shadcn view` shows it after install too.
 
@@ -169,7 +140,7 @@ The same reference ships inside the registry item (`docs` field), so `shadcn vie
 
 ```bash
 npm install
-npm run test             # vitest, 18 tests
+npm run test             # vitest
 npm run typecheck        # tsc --noEmit
 npm run registry:build   # rebuild public/r/*.json
 npm run registry:check   # fail if registry JSONs are stale
