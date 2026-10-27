@@ -3,11 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Advanced Combobox demo</title>
+    <link rel="icon" type="image/svg+xml" href="/advanced-combobox/demo/favicon.svg" />
+    <title>Advanced Combobox — shadcn/ui Combobox with remote search, pagination & multi-select</title>
+    <meta
+      name="description"
+      content="A shadcn registry Combobox for React: remote options with caching and cancellation, client/server pagination, multi-select with limits, and fully typed props — installable with npx shadcn add."
+    />
+    <link rel="canonical" href="https://fernaandojr.github.io/advanced-combobox/demo/" />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#0a0a0a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Advanced Combobox" />
+    <meta
+      property="og:title"
+      content="Advanced Combobox — shadcn/ui Combobox with remote search, pagination & multi-select"
+    />
+    <meta
+      property="og:description"
+      content="A shadcn registry Combobox for React: remote options with caching and cancellation, client/server pagination, multi-select with limits, and fully typed props — installable with npx shadcn add."
+    />
+    <meta property="og:url" content="https://fernaandojr.github.io/advanced-combobox/demo/" />
+    <!-- TODO: og:image with a demo screenshot once available -->
+
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Advanced Combobox — shadcn/ui Combobox with remote search, pagination & multi-select"
+    />
+    <meta
+      name="twitter:description"
+      content="A shadcn registry Combobox for React: remote options with caching and cancellation, client/server pagination, multi-select with limits, and fully typed props."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Advanced Combobox",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "description": "A shadcn registry Combobox for React: remote options with caching and cancellation, client/server pagination, multi-select with limits, and fully typed props — installable with npx shadcn add.",
+        "url": "https://fernaandojr.github.io/advanced-combobox/demo/",
+        "isPartOf": "https://github.com/FernaandoJr/advanced-combobox",
+        "maintainer": {
+          "@type": "Person",
+          "name": "Fernando",
+          "url": "https://github.com/FernaandoJr"
+        }
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static fallback: visible to crawlers and until React mounts. -->
+      <div style="font-family: system-ui, sans-serif; max-width: 42rem; margin: 4rem auto; padding: 0 1.5rem; color: #fafafa; background: #0a0a0a;">
+        <h1>Advanced Combobox</h1>
+        <p>
+          A combobox for the shadcn registry. Simple, light, performatic, reusable — remote
+          options, pagination and multi-select, all typed.
+        </p>
+        <ul>
+          <li>Single or multi selection with limits, clear button, error and required states</li>
+          <li>Remote options: lazy fetch, cancellation, input-driven search, shared cache, retries</li>
+          <li>Client or server pagination</li>
+          <li>Customizable menu items and trigger labels via props</li>
+          <li>Install: <code>npx shadcn add "https://fernaandojr.github.io/advanced-combobox/r/combobox.json"</code></li>
+        </ul>
+        <p><a href="https://github.com/FernaandoJr/advanced-combobox" style="color:#a5b4fc;">GitHub repository</a></p>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
