@@ -12,8 +12,7 @@ export type PersonRole = "admin" | "manager" | "user";
 /**
  * Normalized row: `id` is the option value on list datasets (`code` for
  * cities), `name` is the title, and every optional field feeds one node style
- * or disabled rule. Region rows (tree) satisfy this shape structurally: they
- * have `code`, `name`, `kind` and the tree-only fields below.
+ * or disabled rule.
  */
 export type PlaygroundRow = {
   id?: string;
@@ -33,16 +32,6 @@ export type PlaygroundRow = {
   stateName?: string;
   kind?: string;
   spicy?: boolean;
-  parentCode?: string;
-  children?: PlaygroundRow[];
-};
-
-export type RegionRow = {
-  code: string;
-  name: string;
-  parentCode?: string;
-  children?: RegionRow[];
-  kind?: "super" | "continent" | "country" | "state" | "city";
 };
 
 export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -219,61 +208,6 @@ export function makeFoods(count: number): PlaygroundRow[] {
     };
   });
 }
-
-/* ===== regions (tree) ===== */
-
-export const REGIONS_FLAT: RegionRow[] = [
-  { code: "GR", name: "Global", parentCode: "", kind: "super" },
-  { code: "AM", name: "Americas", parentCode: "GR", kind: "continent" },
-  { code: "BR", name: "Brazil", parentCode: "AM", kind: "country" },
-  { code: "SP", name: "São Paulo", parentCode: "BR", kind: "state" },
-  { code: "SPE", name: "São Paulo City", parentCode: "SP", kind: "city" },
-  { code: "PR", name: "Paraná", parentCode: "BR", kind: "state" },
-  { code: "CUR", name: "Curitiba", parentCode: "PR", kind: "city" },
-  { code: "AR", name: "Argentina", parentCode: "AM", kind: "country" },
-  { code: "MZA", name: "Mendoza", parentCode: "AR", kind: "city" },
-  { code: "EU", name: "Europe", parentCode: "GR", kind: "continent" },
-  { code: "PT", name: "Portugal", parentCode: "EU", kind: "country" },
-  { code: "LIS", name: "Lisbon", parentCode: "PT", kind: "city" },
-];
-
-export const REGIONS_NESTED: RegionRow[] = [
-  {
-    code: "GR",
-    name: "Global",
-    kind: "super",
-    children: [
-      {
-        code: "AM",
-        name: "Americas",
-        kind: "continent",
-        children: [
-          {
-            code: "BR",
-            name: "Brazil",
-            kind: "country",
-            children: [
-              {
-                code: "SP",
-                name: "São Paulo",
-                kind: "state",
-                children: [{ code: "SPE", name: "São Paulo City", kind: "city" }],
-              },
-              { code: "PR", name: "Paraná", kind: "state", children: [{ code: "CUR", name: "Curitiba", kind: "city" }] },
-            ],
-          },
-          { code: "AR", name: "Argentina", kind: "country", children: [{ code: "MZA", name: "Mendoza", kind: "city" }] },
-        ],
-      },
-      {
-        code: "EU",
-        name: "Europe",
-        kind: "continent",
-        children: [{ code: "PT", name: "Portugal", kind: "country", children: [{ code: "LIS", name: "Lisbon", kind: "city" }] }],
-      },
-    ],
-  },
-];
 
 /* ===== simulated remote ===== */
 

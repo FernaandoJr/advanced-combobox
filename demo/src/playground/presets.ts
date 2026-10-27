@@ -1,5 +1,5 @@
-import { DEFAULT_LIST_CONFIG, DEFAULT_TREE_CONFIG } from "./config";
-import type { ListConfig, TreeConfig } from "./config";
+import { DEFAULT_LIST_CONFIG } from "./config";
+import type { ListConfig } from "./config";
 import { datasetConfigDefaults } from "./datasets";
 
 /*
@@ -125,43 +125,6 @@ export const LIST_PRESETS: ListPreset[] = [
   },
 ];
 
-export interface TreePreset {
-  name: string;
-  label: string;
-  patch: Partial<TreeConfig>;
-}
-
-export const TREE_PRESETS: TreePreset[] = [
-  { name: "tree-single", label: "Single (flat)", patch: { shape: "flat" } },
-  { name: "tree-nested", label: "Single (nested)", patch: { shape: "nested" } },
-  {
-    name: "tree-multi",
-    label: "Multi (cascading, max 3)",
-    patch: { shape: "flat", multiple: true, maxSelection: 3 },
-  },
-  {
-    name: "tree-icons",
-    label: "Single (icon per kind)",
-    patch: { shape: "nested", startNodeStyle: "tree-kind-icons" },
-  },
-  {
-    name: "tree-badge-multi",
-    label: "Multi (badge trigger + separator)",
-    patch: {
-      shape: "flat",
-      multiple: true,
-      maxSelection: 5,
-      selectedLabelStyle: "plain-badge",
-      multipleSeparator: " / ",
-    },
-  },
-  {
-    name: "tree-remote",
-    label: "Remote tree",
-    patch: { shape: "flat", remote: true, latency: 400 },
-  },
-];
-
 export function applyListPreset(name: string): ListConfig {
   const preset = LIST_PRESETS.find((candidate) => candidate.name === name) ?? LIST_PRESETS[0];
   const dataset = preset.patch.dataset;
@@ -170,11 +133,6 @@ export function applyListPreset(name: string): ListConfig {
       ? { ...DEFAULT_LIST_CONFIG, ...datasetConfigDefaults(dataset) }
       : DEFAULT_LIST_CONFIG;
   return { ...base, preset: preset.name, ...preset.patch };
-}
-
-export function applyTreePreset(name: string): TreeConfig {
-  const preset = TREE_PRESETS.find((candidate) => candidate.name === name) ?? TREE_PRESETS[0];
-  return { ...DEFAULT_TREE_CONFIG, preset: preset.name, ...preset.patch };
 }
 
 export function listPresetWith(name: string): { config: ListConfig; persistedValue: string | null } {

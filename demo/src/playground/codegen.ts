@@ -1,7 +1,7 @@
-import { DEFAULT_LIST_CONFIG, DEFAULT_TREE_CONFIG } from "./config";
-import type { ListConfig, TreeConfig } from "./config";
+import { DEFAULT_LIST_CONFIG } from "./config";
+import type { ListConfig } from "./config";
 import { getDataset, getDatasetDisableRules } from "./datasets";
-import { getNodeStyle, TREE_ICON_HELPERS } from "./node-styles";
+import { getNodeStyle } from "./node-styles";
 import type { PlaygroundRow } from "./fixtures";
 
 const quote = (value: string) => `"${value.replace(/"/g, '\\"')}"`;
@@ -224,96 +224,4 @@ export function listConfigToCode(config: ListConfig): string {
 
   const component = [`<Combobox`, ...lines, `/>`].join("\n");
   return [...header, ``, component].join("\n");
-}
-
-export function treeConfigToCode(config: TreeConfig): string {
-  const lines: string[] = [];
-  const push = (condition: boolean, line: string) => {
-    if (condition) lines.push(line);
-  };
-
-  push(config.label !== DEFAULT_TREE_CONFIG.label, `  label=${quote(config.label)}`);
-  push(config.required, "  required");
-  push(config.multiple, "  multiple");
-  push(config.fullWidth, "  fullWidth");
-  push(config.disabled, "  disabled");
-  push(config.error, "  error");
-  push(
-    config.multiple && (config.maxSelection ?? null) !== null,
-    `  multipleConfig={{ maxSelection: ${config.maxSelection} }}`,
-  );
-  push(
-    config.placeholder !== DEFAULT_TREE_CONFIG.placeholder,
-    `  placeholder=${quote(config.placeholder)}`,
-  );
-  push(
-    config.searchPlaceholder !== DEFAULT_TREE_CONFIG.searchPlaceholder,
-    `  searchPlaceholder=${quote(config.searchPlaceholder)}`,
-  );
-  push(
-    config.emptyMessage !== DEFAULT_TREE_CONFIG.emptyMessage,
-    `  emptyMessage=${quote(config.emptyMessage)}`,
-  );
-  push(
-    config.remote && config.loadingMessage !== DEFAULT_TREE_CONFIG.loadingMessage,
-    `  loadingMessage=${quote(config.loadingMessage)}`,
-  );
-  push(
-    config.remote &&
-      config.remoteErrorMessage !== DEFAULT_TREE_CONFIG.remoteErrorMessage,
-    `  remoteErrorMessage=${quote(config.remoteErrorMessage)}`,
-  );
-  if (config.remote) {
-    lines.push(
-      `  remote={{ identifier: "playground-regions", optionsFn, refreshOnOpen: ${config.refreshOnOpen} }}`,
-    );
-  } else {
-    lines.push(`  data={rows} // ${config.shape}`);
-    push(config.shape === "flat", `  flatParentKey="parentCode"`);
-  }
-
-  // ----- menuItemConfig (tree) -----
-  const menuItemLines: string[] = [`  value: "code",`, `  label: ["name"],`];
-  const usesTreeIcons = config.startNodeStyle === "tree-kind-icons";
-  const badgeStyle = getNodeStyle(config.selectedLabelStyle);
-  if (config.selectedLabelStyle !== "none" && badgeStyle && !badgeStyle.codeLabel?.includes("Badge")) {
-    // non-badge selected styles are not offered for the tree; ignore invalid values
-  }
-  if (usesTreeIcons) {
-    menuItemLines.push(
-      `  customStartNode: (item) => {`,
-      `    const Icon = KIND_ICONS[item.kind as keyof typeof KIND_ICONS];`,
-      `    return <Icon className='h-4 w-4 text-muted-foreground' />;`,
-      `  },`,
-    );
-  }
-  lines.push(
-    `  value={value}`,
-    `  onChange={(value, items) => setSelection(value, items)}`,
-  );
-  lines.push(`  menuItemConfig={{`, ...menuItemLines, `  }}`);
-
-  // ----- selectedItemConfig (tree) -----
-  const selectedLines: string[] = [];
-  if (badgeStyle?.codeLabel) {
-    selectedLines.push(...inlineFragment(badgeStyle.codeLabel, 4).map((fragmentLine, index) => (index === 0 ? `    customLabel: ${fragmentLine}` : fragmentLine)));
-  }
-  if (config.multiple && config.multipleSeparator) {
-    selectedLines.push(`    multipleSeparator: ${quote(config.multipleSeparator)},`);
-  }
-  if (selectedLines.length > 0) {
-    lines.push(`  selectedItemConfig={{`, ...selectedLines, `  }}`);
-  }
-
-  const header: string[] = [];
-  if (usesTreeIcons) {
-    header.push(`// Also imports from lucide-react: { Building2, Globe, MapPin, MapPinned, Network }`);
-    header.push(``, ...TREE_ICON_HELPERS.split("\n"));
-  }
-  if (badgeStyle?.codeLabel?.includes("Badge")) {
-    header.push(`// Requires the shadcn Badge: npx shadcn add badge`);
-  }
-
-  const component = [`<ComboboxTree`, ...lines, `/>`].join("\n");
-  return header.length > 0 ? [...header, ``, component].join("\n") : component;
 }

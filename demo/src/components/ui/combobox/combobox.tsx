@@ -42,6 +42,7 @@ import {
   getButtonLabelPlainText,
   getButtonStartNode,
   getLabelNode,
+  getMultiSelectionPlainText,
   getRawValueFromItem,
   isSameComboboxValue,
 } from "./utils";
@@ -88,6 +89,13 @@ function FallbackLabel({ children }: { children: ReactNode }) {
   return <span className='min-w-0 truncate block'>{children}</span>;
 }
 
+/**
+ * Advanced Combobox — docs: https://github.com/FernaandoJr/advanced-combobox/blob/main/docs/combobox.md
+ * The full API reference is also installed as `./combobox.md` next to this
+ * file: every prop, config object (`remote`, `menuItemConfig`, `pagination`,
+ * `multipleConfig`, `selectedItemConfig`) and callback documented with types,
+ * defaults and semantics.
+ */
 export function Combobox<T>({
   placeholder: placeholderProp,
   showEmptyOption,
@@ -324,6 +332,26 @@ export function Combobox<T>({
           ? selectedEntries.length - maxVisibleItems
           : 0;
 
+      // Common path: every label resolves to plain text → a single truncated
+      // line that ellipsizes exactly when the trigger runs out of space.
+      const plainLabel = getMultiSelectionPlainText(
+        entriesToShow.map(({ item }) => item),
+        itemConfig,
+        selectedItemConfig,
+        itemsSeparator ?? ", ",
+      );
+      if (plainLabel != null) {
+        return (
+          <span className='flex min-w-0 max-w-full items-center'>
+            <span className='min-w-0 truncate'>{plainLabel}</span>
+            {overflowCount > 0 && (
+              <span className='ml-1 shrink-0 text-muted-foreground'>+{overflowCount}</span>
+            )}
+          </span>
+        );
+      }
+      // Fallback for ReactNode labels: one line clipped at the container edge;
+      // only the last visible item may shrink, so it carries the truncation.
       return (
         <span
           className={cn(
@@ -333,17 +361,21 @@ export function Combobox<T>({
         >
           {entriesToShow.map(({ item, option }, index) => {
             const label = getButtonLabelNode(item, itemConfig, selectedItemConfig);
+            const isLast = index === entriesToShow.length - 1;
             return (
-              <span key={String(option.value)} className='flex min-w-0 items-center'>
+              <span
+                key={String(option.value)}
+                className={cn("flex min-w-0 items-center", !isLast && "shrink-0")}
+              >
                 {index > 0 && itemsSeparator && (
-                  <span className='mx-1 text-muted-foreground'>{itemsSeparator}</span>
+                  <span className='mx-1 shrink-0 text-muted-foreground'>{itemsSeparator}</span>
                 )}
-                <span className='truncate max-w-28'>{label}</span>
+                <span className={cn("truncate", isLast ? "min-w-0" : "max-w-28")}>{label}</span>
               </span>
             );
           })}
           {overflowCount > 0 && (
-            <span className='text-muted-foreground ml-1'>+{overflowCount}</span>
+            <span className='ml-1 shrink-0 text-muted-foreground'>+{overflowCount}</span>
           )}
         </span>
       );

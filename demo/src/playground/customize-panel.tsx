@@ -1,8 +1,8 @@
 import { WithHint, PreviewInput, PreviewSelect, PreviewSlider, PreviewSwitch } from "@/preview";
-import type { ListConfig, TreeConfig } from "./config";
+import type { ListConfig } from "./config";
 import { DATASETS, getDataset, getDatasetDisableRules } from "./datasets";
 import { stylesFor } from "./node-styles";
-import { LIST_PRESETS, TREE_PRESETS } from "./presets";
+import { LIST_PRESETS } from "./presets";
 
 /*
   Customize panel: rows grouped into labeled sections (General / Menu items /
@@ -47,8 +47,6 @@ const HINTS = {
   triggerStartNode: "customStartNode of the trigger. Replaces the menu start node.",
   multipleSeparator: "Text between each selected item in the trigger (e.g. / or \" | \").",
   disableStartNode: "Hides the start node in the trigger (menu keeps it).",
-  treeShape: "Flat rows join by flatParentKey into a tree; nested rows are already nested.",
-  treeRemote: "Fetches rows from the simulated API instead of using the local data.",
   label: "Text bound to the trigger via htmlFor.",
   placeholder: "Text shown while nothing is selected.",
   searchPlaceholder: "Placeholder of the search input.",
@@ -58,8 +56,6 @@ const HINTS = {
   emptyOptionLabel: "Text of the selectable clear option.",
   clearButtonLabel: "Accessible label of the trigger clear button.",
   loadMoreLabel: "Button that renders the next page.",
-  expandAllLabel: "Accessible label of the expand-all button.",
-  collapseAllLabel: "Accessible label of the collapse-all button.",
 } as const;
 
 const NONE = { value: "none", label: "None" };
@@ -477,194 +473,6 @@ export function ListCustomizePanel({
           onChange={(value) => set("loadMoreLabel", value)}
         />
       )}
-    </div>
-  );
-}
-
-export function TreeCustomizePanel({
-  config,
-  set,
-  setPreset,
-}: {
-  config: TreeConfig;
-  set: <K extends keyof TreeConfig>(key: K, value: TreeConfig[K]) => void;
-  setPreset: (name: string) => void;
-}) {
-  return (
-    <div className='preview-options'>
-      <PreviewSection title='General' />
-      <PreviewSelect
-        title='Preset'
-        value={config.preset}
-        options={TREE_PRESETS.map((preset) => ({ value: preset.name, label: preset.label }))}
-        hint={HINTS.preset}
-        onChange={setPreset}
-      />
-      <PreviewSelect
-        title='Shape'
-        value={config.shape}
-        options={[
-          { value: "flat", label: "Flat rows" },
-          { value: "nested", label: "Nested rows" },
-        ]}
-        hint={HINTS.treeShape}
-        onChange={(value) => set("shape", value as TreeConfig["shape"])}
-      />
-      <PreviewSwitch
-        title='remote'
-        isChecked={config.remote}
-        hint={HINTS.treeRemote}
-        onChange={(checked) => set("remote", checked)}
-      />
-      {config.remote && (
-        <PreviewSlider
-          title='Latency'
-          value={config.latency}
-          min={0}
-          max={1500}
-          step={50}
-          displayValue={(value) => `${value}ms`}
-          hint={HINTS.latency}
-          onChange={(value) => set("latency", value)}
-        />
-      )}
-      <PreviewSwitch
-        title='Fail next request'
-        isChecked={config.failAfterCalls === 1}
-        hint={HINTS.failNext}
-        onChange={(checked) => set("failAfterCalls", checked ? 1 : 0)}
-      />
-      <PreviewSwitch
-        title='refreshOnOpen'
-        isChecked={config.refreshOnOpen}
-        hint={HINTS.refreshOnOpen}
-        onChange={(checked) => set("refreshOnOpen", checked)}
-      />
-      <PreviewSwitch
-        title='multiple'
-        isChecked={config.multiple}
-        hint={HINTS.multiple}
-        onChange={(checked) => set("multiple", checked)}
-      />
-      {config.multiple && (
-        <PreviewSlider
-          title='maxSelection (0 = unlimited)'
-          value={config.maxSelection === null ? 0 : config.maxSelection}
-          min={0}
-          max={20}
-          hint={HINTS.maxSelection}
-          onChange={(value) => set("maxSelection", value <= 0 ? null : value)}
-        />
-      )}
-      <PreviewSwitch
-        title='fullWidth'
-        isChecked={config.fullWidth}
-        hint={HINTS.fullWidth}
-        onChange={(checked) => set("fullWidth", checked)}
-      />
-      <PreviewSwitch
-        title='disabled'
-        isChecked={config.disabled}
-        hint={HINTS.disabled}
-        onChange={(checked) => set("disabled", checked)}
-      />
-      <PreviewSwitch
-        title='required'
-        isChecked={config.required}
-        hint={HINTS.required}
-        onChange={(checked) => set("required", checked)}
-      />
-      <PreviewSwitch
-        title='error'
-        isChecked={config.error}
-        hint={HINTS.error}
-        onChange={(checked) => set("error", checked)}
-      />
-      <PreviewSection title='Menu items' />
-      <PreviewSelect
-        title='Start node'
-        value={config.startNodeStyle}
-        options={[
-          { value: "none", label: "None" },
-          { value: "tree-kind-icons", label: "Kind icons (region/state/city)" },
-        ]}
-        hint={HINTS.menuStartNode}
-        onChange={(value) => set("startNodeStyle", value)}
-      />
-      <PreviewSection title='Trigger (selected item)' />
-      <PreviewSelect
-        title='Custom label'
-        value={config.selectedLabelStyle}
-        options={[
-          { value: "none", label: "None" },
-          { value: "plain-badge", label: "Name in a Badge" },
-        ]}
-        hint={HINTS.triggerCustomLabel}
-        onChange={(value) => set("selectedLabelStyle", value)}
-      />
-      {config.multiple && (
-        <PreviewInput
-          title='multipleSeparator'
-          value={config.multipleSeparator}
-          hint={HINTS.multipleSeparator}
-          onChange={(value) => set("multipleSeparator", value)}
-        />
-      )}
-
-      {/* ===== text labels ===== */}
-      <PreviewSection title='Labels' />
-      <PreviewInput
-        title='label'
-        value={config.label}
-        hint={HINTS.label}
-        onChange={(value) => set("label", value)}
-      />
-      <PreviewInput
-        title='placeholder'
-        value={config.placeholder}
-        hint={HINTS.placeholder}
-        onChange={(value) => set("placeholder", value)}
-      />
-      <PreviewInput
-        title='searchPlaceholder'
-        value={config.searchPlaceholder}
-        hint={HINTS.searchPlaceholder}
-        onChange={(value) => set("searchPlaceholder", value)}
-      />
-      <PreviewInput
-        title='emptyMessage'
-        value={config.emptyMessage}
-        hint={HINTS.emptyMessage}
-        onChange={(value) => set("emptyMessage", value)}
-      />
-      {config.remote && (
-        <PreviewInput
-          title='loadingMessage'
-          value={config.loadingMessage}
-          hint={HINTS.loadingMessage}
-          onChange={(value) => set("loadingMessage", value)}
-        />
-      )}
-      {config.remote && (
-        <PreviewInput
-          title='remoteErrorMessage'
-          value={config.remoteErrorMessage}
-          hint={HINTS.remoteErrorMessage}
-          onChange={(value) => set("remoteErrorMessage", value)}
-        />
-      )}
-      <PreviewInput
-        title='expandAllLabel'
-        value={config.expandAllLabel}
-        hint={HINTS.expandAllLabel}
-        onChange={(value) => set("expandAllLabel", value)}
-      />
-      <PreviewInput
-        title='collapseAllLabel'
-        value={config.collapseAllLabel}
-        hint={HINTS.collapseAllLabel}
-        onChange={(value) => set("collapseAllLabel", value)}
-      />
     </div>
   );
 }

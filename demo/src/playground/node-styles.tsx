@@ -1,11 +1,6 @@
 import {
-  Building2,
   ChartLine,
-  Globe,
   LayoutGrid,
-  MapPin,
-  MapPinned,
-  Network,
   Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -62,16 +57,6 @@ const FOOD_EMOJI_HELPERS = [
   `  dish: "🍛",`,
   `  dessert: "🍮",`,
   `  drink: "🥤",`,
-  `};`,
-].join("\n");
-
-export const TREE_ICON_HELPERS = [
-  `const KIND_ICONS = {`,
-  `  super: Network,`,
-  `  continent: Globe,`,
-  `  country: Building2,`,
-  `  state: MapPinned,`,
-  `  city: MapPin,`,
   `};`,
 ].join("\n");
 
@@ -373,20 +358,6 @@ export function getNodeStyle(key: string): NodeStyleSpec | null {
 /** Styles valid for this dataset, filtered by the kind being configured. */
 export function stylesFor(dataset: DatasetKey, kind: NodeStyleKind): NodeStyleSpec[] {
   return NODE_STYLES.filter((style) => style.datasets.includes(dataset) && style.kinds.includes(kind));
-}
-
-/** Icon styles for the tree's kind field (one-runtime Shield/Folder pattern). */
-export const TREE_KIND_ICONS = {
-  super: Network,
-  continent: Globe,
-  country: Building2,
-  state: MapPinned,
-  city: MapPin,
-} as const;
-
-export function renderTreeStart(item: PlaygroundRow) {
-  const Icon = TREE_KIND_ICONS[(item.kind ?? "city") as keyof typeof TREE_KIND_ICONS];
-  return <Icon className='h-4 w-4 text-muted-foreground' />;
 }
 
 export function indentCode(code: string, pad: string): string[] {
